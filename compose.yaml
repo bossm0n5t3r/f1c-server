@@ -1,0 +1,10 @@
+services:
+  database:
+    container_name: 'f1c-postgres'
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=f1c'
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+    ports:
+      - '54323:5432'
