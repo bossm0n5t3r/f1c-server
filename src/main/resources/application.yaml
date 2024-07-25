@@ -4,9 +4,3 @@ spring:
   docker:
     compose:
       enabled: false
-  datasource:
-    hikari:
-      jdbc-url: jdbc:postgresql://localhost:54323/f1c
-      driver-class-name: org.postgresql.Driver
-      username: postgres
-      password: postgres
