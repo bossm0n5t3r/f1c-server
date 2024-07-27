@@ -38,3 +38,7 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### ETC ###
+**/src/main/resources/data/
+**/application-*.yaml
