@@ -6,7 +6,7 @@ spring:
       enabled: false
   datasource:
     hikari:
-      jdbc-url: jdbc:postgresql://localhost:54323/f1c
+      jdbc-url: jdbc:postgresql://localhost:54323/f1c?reWriteBatchedInserts=true
       driver-class-name: org.postgresql.Driver
       username: postgres
       password: postgres
