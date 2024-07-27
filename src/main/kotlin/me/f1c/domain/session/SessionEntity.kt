@@ -22,21 +22,3 @@ class SessionEntity(id: EntityID<Long>) : BaseLongEntity(id, Sessions) {
     var circuitShortName by Sessions.circuitShortName
     var year by Sessions.year
 }
-
-fun SessionEntity.toDto() =
-    SessionDto(
-        sessionKey,
-        sessionName,
-        dateStart,
-        dateEnd,
-        gmtOffset,
-        sessionType,
-        meetingKey,
-        location,
-        countryCode,
-        countryKey,
-        countryName,
-        circuitKey,
-        circuitShortName,
-        year,
-    )

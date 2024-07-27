@@ -1,20 +1,22 @@
 package me.f1c.domain.session
 
-import kotlinx.datetime.LocalDateTime
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class SessionDto(
     val sessionKey: Int,
-    val sessionName: String? = null,
-    val dateStart: LocalDateTime? = null,
-    val dateEnd: LocalDateTime? = null,
-    val gmtOffset: String? = null,
-    val sessionType: String? = null,
+    val sessionName: String,
+    val dateStart: String,
+    val dateEnd: String,
+    val gmtOffset: String,
+    val sessionType: String,
     val meetingKey: Int,
     val location: String,
-    val countryCode: String? = null,
+    val countryCode: String,
     val countryKey: Int,
-    val countryName: String? = null,
+    val countryName: String,
     val circuitKey: Int,
-    val circuitShortName: String? = null,
+    val circuitShortName: String,
     val year: Int,
 )

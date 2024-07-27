@@ -3,7 +3,6 @@ package me.f1c.adapter.session
 import kotlinx.datetime.toKotlinLocalDateTime
 import me.f1c.domain.session.SessionDto
 import me.f1c.domain.session.SessionEntity
-import me.f1c.domain.session.SessionResponseDto
 import me.f1c.domain.session.Sessions
 import me.f1c.domain.session.toDto
 import me.f1c.port.session.SessionRepository
@@ -12,6 +11,7 @@ import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
+import java.time.OffsetDateTime
 
 @Repository
 class SessionRepositoryImpl(
@@ -30,13 +30,13 @@ class SessionRepositoryImpl(
         return this.findAll().map { it.sessionKey }
     }
 
-    override fun batchInsert(sessionResponseDtoList: List<SessionResponseDto>): Int =
+    override fun batchInsert(sessionDtoList: List<SessionDto>): Int =
         transaction(database) {
-            Sessions.batchInsert(sessionResponseDtoList) {
+            Sessions.batchInsert(sessionDtoList) {
                 this[Sessions.sessionKey] = it.sessionKey
                 this[Sessions.sessionName] = it.sessionName
-                this[Sessions.dateStart] = it.dateStart?.toLocalDateTime()?.toKotlinLocalDateTime()
-                this[Sessions.dateEnd] = it.dateEnd?.toLocalDateTime()?.toKotlinLocalDateTime()
+                this[Sessions.dateStart] = OffsetDateTime.parse(it.dateStart).toLocalDateTime().toKotlinLocalDateTime()
+                this[Sessions.dateEnd] = OffsetDateTime.parse(it.dateEnd).toLocalDateTime().toKotlinLocalDateTime()
                 this[Sessions.gmtOffset] = it.gmtOffset
                 this[Sessions.sessionType] = it.sessionType
                 this[Sessions.meetingKey] = it.meetingKey

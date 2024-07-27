@@ -23,12 +23,12 @@ class SessionService(
                     .retrieve()
                     .toEntity(String::class.java)
             val bodyString = rawResponse.body ?: error("Body does not exist")
-            val sessionResponseDtoList = objectMapper.readValue<List<SessionResponseDto>>(bodyString)
+            val sessionDtoList = objectMapper.readValue<List<SessionDto>>(bodyString)
             val allSessionKeys = this.findAllSessionKeys().toSet()
-            val filteredSessionResponseDtoList =
-                sessionResponseDtoList
+            val filteredSessionDtoList =
+                sessionDtoList
                     .filterNot { allSessionKeys.contains(it.sessionKey) }
-            sessionRepository.batchInsert(filteredSessionResponseDtoList)
+            sessionRepository.batchInsert(filteredSessionDtoList)
         }.onSuccess {
             LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}", it)
         }.onFailure {
