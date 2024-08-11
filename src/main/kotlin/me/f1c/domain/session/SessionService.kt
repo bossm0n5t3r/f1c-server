@@ -50,7 +50,7 @@ class SessionService(
         }.onSuccess {
             LOGGER.info("${LogResult.SUCCEEDED.name} findBySessionKey: {}", sessionKey)
         }.onFailure {
-            LOGGER.error("${LogResult.FAILED.name} findBySessionKey: {}, ", it.message, it)
+            LOGGER.error("${LogResult.FAILED.name} findBySessionKey: {}, {}, ", sessionKey, it.message, it)
         }.getOrThrow()
 
     fun findAllSessionKeys(): List<Int> =

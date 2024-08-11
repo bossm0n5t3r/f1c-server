@@ -18,9 +18,9 @@ class DriverService(
         runCatching {
             driverRepository.findAll(sessionKey)
         }.onSuccess {
-            LOGGER.info("${LogResult.SUCCEEDED.name} findAll: {}", it.size)
+            LOGGER.info("${LogResult.SUCCEEDED.name} findAll: {}, {}", sessionKey, it.size)
         }.onFailure {
-            LOGGER.error("${LogResult.FAILED.name} findAll: {}, ", it.message, it)
+            LOGGER.error("${LogResult.FAILED.name} findAll: {}, {}, ", sessionKey, it.message, it)
         }.getOrThrow()
 
     fun upToDate(sessionKey: Int): Int =
@@ -35,8 +35,8 @@ class DriverService(
             val driverDtoList = objectMapper.readValue<List<DriverDto>>(bodyString)
             driverRepository.batchInsert(driverDtoList)
         }.onSuccess {
-            LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}", it)
+            LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}, {}", sessionKey, it)
         }.onFailure {
-            LOGGER.error("${LogResult.FAILED.name} upToDate: {}, ", it.message, it)
+            LOGGER.error("${LogResult.FAILED.name} upToDate: {}, {}, ", sessionKey, it.message, it)
         }.getOrThrow()
 }
