@@ -23,10 +23,10 @@ data class LapDto(
     @JsonProperty("duration_sector_3")
     val durationSector3: BigDecimal?,
     @JsonProperty("segments_sector_1")
-    val segmentsSector1: List<Int>,
+    val segmentsSector1: List<Int?>,
     @JsonProperty("segments_sector_2")
-    val segmentsSector2: List<Int>,
+    val segmentsSector2: List<Int?>,
     @JsonProperty("segments_sector_3")
-    val segmentsSector3: List<Int>,
+    val segmentsSector3: List<Int?>,
     val lapNumber: Int,
 )
