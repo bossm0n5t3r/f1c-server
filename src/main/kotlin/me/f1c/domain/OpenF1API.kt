@@ -6,4 +6,5 @@ object OpenF1API {
     const val SESSION_API = "${OPEN_F1_API}/sessions"
     const val DRIVER_API = "${OPEN_F1_API}/drivers"
     const val LAP_API = "${OPEN_F1_API}/laps"
+    const val PIT_API = "${OPEN_F1_API}/pit"
 }
