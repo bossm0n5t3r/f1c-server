@@ -22,7 +22,6 @@ repositories {
 
 extra["springAiVersion"] = "1.0.0-M1"
 val exposedVersion: String by project
-val springDocOpenAPIVersion: String by project
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -49,8 +48,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion")
-
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenAPIVersion")
 }
 
 dependencyManagement {
