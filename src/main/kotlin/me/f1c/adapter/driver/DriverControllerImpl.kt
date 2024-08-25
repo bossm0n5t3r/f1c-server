@@ -25,7 +25,5 @@ class DriverControllerImpl(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun upToDate(
         @PathVariable sessionKey: Int,
-    ): Int {
-        return driverService.upToDate(sessionKey)
-    }
+    ): Int = driverService.upToDate(sessionKey)
 }

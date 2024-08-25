@@ -30,6 +30,10 @@ class PitRepositoryImpl(
 
     override fun findAllBySessionKey(sessionKey: Int): List<PitDto> =
         transaction(database) {
-            Pits.selectAll().where { Pits.sessionKey eq sessionKey }.run { PitEntity.wrapRows(this) }.map { it.toDto() }
+            Pits
+                .selectAll()
+                .where { Pits.sessionKey eq sessionKey }
+                .run { PitEntity.wrapRows(this) }
+                .map { it.toDto() }
         }
 }

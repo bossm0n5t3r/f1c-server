@@ -20,14 +20,10 @@ class PositionControllerImpl(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun upToDate(
         @PathVariable sessionKey: Int,
-    ): Int {
-        return positionService.upToDate(sessionKey)
-    }
+    ): Int = positionService.upToDate(sessionKey)
 
     @GetMapping("/{sessionKey}/rankings")
     override fun rankings(
         @PathVariable sessionKey: Int,
-    ): List<DriverDto> {
-        return positionService.rankings(sessionKey)
-    }
+    ): List<DriverDto> = positionService.rankings(sessionKey)
 }

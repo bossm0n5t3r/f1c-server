@@ -4,7 +4,9 @@ import me.f1c.domain.BaseLongEntity
 import me.f1c.domain.BaseLongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class LapEntity(id: EntityID<Long>) : BaseLongEntity(id, Laps) {
+class LapEntity(
+    id: EntityID<Long>,
+) : BaseLongEntity(id, Laps) {
     companion object : BaseLongEntityClass<LapEntity>(Laps)
 
     var meetingKey by Laps.meetingKey

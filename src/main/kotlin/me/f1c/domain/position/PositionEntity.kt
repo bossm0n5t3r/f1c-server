@@ -4,7 +4,9 @@ import me.f1c.domain.BaseLongEntity
 import me.f1c.domain.BaseLongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class PositionEntity(id: EntityID<Long>) : BaseLongEntity(id, Positions) {
+class PositionEntity(
+    id: EntityID<Long>,
+) : BaseLongEntity(id, Positions) {
     companion object : BaseLongEntityClass<PositionEntity>(Positions)
 
     var date by Positions.date

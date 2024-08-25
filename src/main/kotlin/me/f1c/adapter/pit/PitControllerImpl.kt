@@ -18,7 +18,5 @@ class PitControllerImpl(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun upToDate(
         @PathVariable sessionKey: Int,
-    ): Int {
-        return pitService.upToDate(sessionKey)
-    }
+    ): Int = pitService.upToDate(sessionKey)
 }

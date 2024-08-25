@@ -22,31 +22,28 @@ class SessionRepositoryImpl(
             Sessions.selectAll().run { SessionEntity.wrapRows(this) }.map { it.toDto() }
         }
 
-    override fun findBySessionKey(sessionKey: Int): SessionDto? {
-        return this.findAll().find { it.sessionKey == sessionKey }
-    }
+    override fun findBySessionKey(sessionKey: Int): SessionDto? = this.findAll().find { it.sessionKey == sessionKey }
 
-    override fun findAllSessionKeys(): List<Int> {
-        return this.findAll().map { it.sessionKey }
-    }
+    override fun findAllSessionKeys(): List<Int> = this.findAll().map { it.sessionKey }
 
     override fun batchInsert(sessionDtoList: List<SessionDto>): Int =
         transaction(database) {
-            Sessions.batchInsert(sessionDtoList) {
-                this[Sessions.sessionKey] = it.sessionKey
-                this[Sessions.sessionName] = it.sessionName
-                this[Sessions.dateStart] = OffsetDateTime.parse(it.dateStart).toLocalDateTime().toKotlinLocalDateTime()
-                this[Sessions.dateEnd] = OffsetDateTime.parse(it.dateEnd).toLocalDateTime().toKotlinLocalDateTime()
-                this[Sessions.gmtOffset] = it.gmtOffset
-                this[Sessions.sessionType] = it.sessionType
-                this[Sessions.meetingKey] = it.meetingKey
-                this[Sessions.location] = it.location
-                this[Sessions.countryCode] = it.countryCode
-                this[Sessions.countryKey] = it.countryKey
-                this[Sessions.countryName] = it.countryName
-                this[Sessions.circuitKey] = it.circuitKey
-                this[Sessions.circuitShortName] = it.circuitShortName
-                this[Sessions.year] = it.year
-            }.size
+            Sessions
+                .batchInsert(sessionDtoList) {
+                    this[Sessions.sessionKey] = it.sessionKey
+                    this[Sessions.sessionName] = it.sessionName
+                    this[Sessions.dateStart] = OffsetDateTime.parse(it.dateStart).toLocalDateTime().toKotlinLocalDateTime()
+                    this[Sessions.dateEnd] = OffsetDateTime.parse(it.dateEnd).toLocalDateTime().toKotlinLocalDateTime()
+                    this[Sessions.gmtOffset] = it.gmtOffset
+                    this[Sessions.sessionType] = it.sessionType
+                    this[Sessions.meetingKey] = it.meetingKey
+                    this[Sessions.location] = it.location
+                    this[Sessions.countryCode] = it.countryCode
+                    this[Sessions.countryKey] = it.countryKey
+                    this[Sessions.countryName] = it.countryName
+                    this[Sessions.circuitKey] = it.circuitKey
+                    this[Sessions.circuitShortName] = it.circuitShortName
+                    this[Sessions.year] = it.year
+                }.size
         }
 }

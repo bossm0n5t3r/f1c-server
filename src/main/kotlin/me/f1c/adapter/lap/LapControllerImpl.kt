@@ -18,7 +18,5 @@ class LapControllerImpl(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun upToDate(
         @PathVariable sessionKey: Int,
-    ): Int {
-        return lapService.upToDate(sessionKey)
-    }
+    ): Int = lapService.upToDate(sessionKey)
 }

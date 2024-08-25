@@ -4,7 +4,9 @@ import me.f1c.domain.BaseLongEntity
 import me.f1c.domain.BaseLongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class DriverEntity(id: EntityID<Long>) : BaseLongEntity(id, Drivers) {
+class DriverEntity(
+    id: EntityID<Long>,
+) : BaseLongEntity(id, Drivers) {
     companion object : BaseLongEntityClass<DriverEntity>(Drivers)
 
     var driverNumber by Drivers.driverNumber

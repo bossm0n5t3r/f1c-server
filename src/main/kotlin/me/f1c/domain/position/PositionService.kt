@@ -34,29 +34,31 @@ class PositionService(
             LOGGER.error("${LogResult.FAILED.name} upToDate: {}, {}, ", sessionKey, it.message, it)
         }.getOrThrow()
 
-    fun rankings(sessionKey: Int): List<DriverDto> {
-        return try {
+    fun rankings(sessionKey: Int): List<DriverDto> =
+        try {
             val drivers =
-                driverRepository.findAll(sessionKey)
+                driverRepository
+                    .findAll(sessionKey)
                     .takeIf { it.isNotEmpty() }
                     ?: error("Drivers is empty")
 
             val positions =
-                positionRepository.findAllBySessionKey(sessionKey)
+                positionRepository
+                    .findAllBySessionKey(sessionKey)
                     .takeIf { it.isNotEmpty() }
                     ?: error("Positions is empty")
 
             val driverNumberToDriver = drivers.associateBy { it.driverNumber }
 
-            positions.groupBy { it.driverNumber }.values
+            positions
+                .groupBy { it.driverNumber }
+                .values
                 .mapNotNull { positionsGroupByDriverNumber ->
                     positionsGroupByDriverNumber.maxByOrNull { it.dataAsLocalDateTime }
-                }
-                .sortedBy { it.position }
+                }.sortedBy { it.position }
                 .mapNotNull { driverNumberToDriver[it.driverNumber] }
         } catch (e: Exception) {
             LOGGER.error("${LogResult.FAILED.name} rankings: {}, {}, ", sessionKey, e.message, e)
             throw e
         }
-    }
 }

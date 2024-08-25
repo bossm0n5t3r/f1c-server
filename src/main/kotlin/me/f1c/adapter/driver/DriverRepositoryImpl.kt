@@ -17,7 +17,11 @@ class DriverRepositoryImpl(
 ) : DriverRepository {
     override fun findAll(sessionKey: Int): List<DriverDto> =
         transaction(database) {
-            Drivers.selectAll().where { Drivers.sessionKey eq sessionKey }.run { DriverEntity.wrapRows(this) }.map { it.toDto() }
+            Drivers
+                .selectAll()
+                .where { Drivers.sessionKey eq sessionKey }
+                .run { DriverEntity.wrapRows(this) }
+                .map { it.toDto() }
         }
 
     override fun batchInsert(driverDtoList: List<DriverDto>): Int =

@@ -29,6 +29,10 @@ class PositionRepositoryImpl(
 
     override fun findAllBySessionKey(sessionKey: Int): List<PositionDto> =
         transaction(database) {
-            Positions.selectAll().where { Positions.sessionKey eq sessionKey }.run { PositionEntity.wrapRows(this) }.map { it.toDto() }
+            Positions
+                .selectAll()
+                .where { Positions.sessionKey eq sessionKey }
+                .run { PositionEntity.wrapRows(this) }
+                .map { it.toDto() }
         }
 }

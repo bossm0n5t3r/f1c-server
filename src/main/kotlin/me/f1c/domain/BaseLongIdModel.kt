@@ -14,17 +14,24 @@ import java.time.LocalDateTime
 
 fun currentKotlinLocalDateTimeUtc(): kotlinx.datetime.LocalDateTime = LocalDateTime.now(Clock.systemUTC()).toKotlinLocalDateTime()
 
-abstract class BaseLongIdTable(name: String) : LongIdTable(name) {
+abstract class BaseLongIdTable(
+    name: String,
+) : LongIdTable(name) {
     val createdAt = datetime("created_at").clientDefault { currentKotlinLocalDateTimeUtc() }
     val updatedAt = datetime("updated_at").nullable()
 }
 
-abstract class BaseLongEntity(id: EntityID<Long>, table: BaseLongIdTable) : LongEntity(id) {
+abstract class BaseLongEntity(
+    id: EntityID<Long>,
+    table: BaseLongIdTable,
+) : LongEntity(id) {
     val createdAt by table.createdAt
     var updatedAt by table.updatedAt
 }
 
-abstract class BaseLongEntityClass<E : BaseLongEntity>(table: BaseLongIdTable) : LongEntityClass<E>(table) {
+abstract class BaseLongEntityClass<E : BaseLongEntity>(
+    table: BaseLongIdTable,
+) : LongEntityClass<E>(table) {
     init {
         EntityHook.subscribe { action ->
             if (action.changeType == EntityChangeType.Updated) {
