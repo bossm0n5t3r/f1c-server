@@ -26,8 +26,8 @@ class LapService(
             val lapDtoList = objectMapper.readValue<List<LapDto>>(bodyString)
             lapRepository.batchInsert(lapDtoList)
         }.onSuccess {
-            LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}", it)
+            LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}, {}", sessionKey, it)
         }.onFailure {
-            LOGGER.error("${LogResult.FAILED.name} upToDate: {}, ", it.message, it)
+            LOGGER.error("${LogResult.FAILED.name} upToDate: {}, {}, ", sessionKey, it.message, it)
         }.getOrThrow()
 }
