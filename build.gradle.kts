@@ -1,8 +1,8 @@
 plugins {
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
-    kotlin("jvm") version "2.0.0"
-    kotlin("plugin.spring") version "2.0.0"
+    kotlin("jvm") version "2.0.20"
+    kotlin("plugin.spring") version "2.0.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
@@ -22,6 +22,7 @@ repositories {
 
 extra["springAiVersion"] = "1.0.0-M1"
 val exposedVersion: String by project
+val springDocOpenAPIVersion: String by project
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -48,6 +49,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion")
+
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenAPIVersion")
 }
 
 dependencyManagement {
@@ -67,7 +70,7 @@ tasks.withType<Test> {
 }
 
 ktlint {
-    version.set("1.0.0")
+    version.set("1.3.1")
 }
 
 tasks.bootJar {
