@@ -57,6 +57,7 @@ class PositionService(
                     positionsGroupByDriverNumber.maxByOrNull { it.dataAsLocalDateTime }
                 }.sortedBy { it.position }
                 .mapNotNull { driverNumberToDriver[it.driverNumber] }
+                .also { LOGGER.info("${LogResult.SUCCEEDED.name} rankings: {}, {}", sessionKey, it.size) }
         } catch (e: Exception) {
             LOGGER.error("${LogResult.FAILED.name} rankings: {}, {}, ", sessionKey, e.message, e)
             throw e
