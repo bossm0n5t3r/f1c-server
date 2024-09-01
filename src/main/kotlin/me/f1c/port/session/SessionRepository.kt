@@ -10,4 +10,6 @@ interface SessionRepository {
     fun findAllSessionKeys(): List<Int>
 
     fun batchInsert(sessionDtoList: List<SessionDto>): Int
+
+    fun findLatestSession(): SessionDto?
 }

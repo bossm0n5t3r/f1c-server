@@ -7,6 +7,7 @@ import me.f1c.domain.session.Sessions
 import me.f1c.domain.session.toDto
 import me.f1c.port.session.SessionRepository
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -45,5 +46,15 @@ class SessionRepositoryImpl(
                     this[Sessions.circuitShortName] = it.circuitShortName
                     this[Sessions.year] = it.year
                 }.size
+        }
+
+    override fun findLatestSession(): SessionDto? =
+        transaction(database) {
+            Sessions
+                .selectAll()
+                .orderBy(Sessions.dateStart to SortOrder.DESC)
+                .run { SessionEntity.wrapRows(this) }
+                .firstOrNull()
+                ?.toDto()
         }
 }
