@@ -1,6 +1,8 @@
 package me.f1c.adapter.pit
 
+import me.f1c.domain.ResponseDto
 import me.f1c.domain.pit.PitService
+import me.f1c.domain.toResponseDto
 import me.f1c.port.pit.PitController
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,5 +20,5 @@ class PitControllerImpl(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun upToDate(
         @PathVariable sessionKey: Int,
-    ): Int = pitService.upToDate(sessionKey)
+    ): ResponseDto<Int> = pitService.upToDate(sessionKey).toResponseDto()
 }

@@ -1,6 +1,8 @@
 package me.f1c.adapter.lap
 
+import me.f1c.domain.ResponseDto
 import me.f1c.domain.lap.LapService
+import me.f1c.domain.toResponseDto
 import me.f1c.port.lap.LapController
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,5 +20,5 @@ class LapControllerImpl(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     override fun upToDate(
         @PathVariable sessionKey: Int,
-    ): Int = lapService.upToDate(sessionKey)
+    ): ResponseDto<Int> = lapService.upToDate(sessionKey).toResponseDto()
 }

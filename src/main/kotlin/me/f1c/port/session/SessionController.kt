@@ -1,13 +1,14 @@
 package me.f1c.port.session
 
+import me.f1c.domain.ResponseDto
 import me.f1c.domain.session.SessionDto
 
 interface SessionController {
-    fun upToDate(): Int
+    fun upToDate(): ResponseDto<Int>
 
-    fun findAll(): List<SessionDto>
+    fun findAll(): ResponseDto<List<SessionDto>>
 
-    fun findBySessionKey(sessionKey: Int): SessionDto?
+    fun findBySessionKey(sessionKey: Int): ResponseDto<SessionDto?>
 
-    fun findAllSessionKeys(): List<Int>
+    fun findAllSessionKeys(): ResponseDto<List<Int>>
 }

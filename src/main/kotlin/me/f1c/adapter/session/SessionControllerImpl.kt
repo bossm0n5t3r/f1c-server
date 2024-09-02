@@ -1,7 +1,9 @@
 package me.f1c.adapter.session
 
+import me.f1c.domain.ResponseDto
 import me.f1c.domain.session.SessionDto
 import me.f1c.domain.session.SessionService
+import me.f1c.domain.toResponseDto
 import me.f1c.port.session.SessionController
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,16 +20,16 @@ class SessionControllerImpl(
 ) : SessionController {
     @PutMapping("/up-to-date")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    override fun upToDate(): Int = sessionService.upToDate()
+    override fun upToDate(): ResponseDto<Int> = sessionService.upToDate().toResponseDto()
 
     @GetMapping
-    override fun findAll(): List<SessionDto> = sessionService.findAll()
+    override fun findAll(): ResponseDto<List<SessionDto>> = sessionService.findAll().toResponseDto()
 
     @GetMapping("/{sessionKey}")
     override fun findBySessionKey(
         @PathVariable sessionKey: Int,
-    ): SessionDto? = sessionService.findBySessionKey(sessionKey)
+    ): ResponseDto<SessionDto?> = sessionService.findBySessionKey(sessionKey).toResponseDto()
 
     @GetMapping("/session-keys")
-    override fun findAllSessionKeys(): List<Int> = sessionService.findAllSessionKeys()
+    override fun findAllSessionKeys(): ResponseDto<List<Int>> = sessionService.findAllSessionKeys().toResponseDto()
 }
