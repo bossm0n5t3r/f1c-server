@@ -1,6 +1,3 @@
-server:
-  forward-headers-strategy: FRAMEWORK
-
 spring:
   application:
     name: f1c-server
