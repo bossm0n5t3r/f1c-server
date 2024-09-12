@@ -22,6 +22,7 @@ repositories {
 
 extra["springAiVersion"] = "1.0.0-M1"
 val exposedVersion: String by project
+val springDocOpenAPIVersion: String by project
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -33,7 +34,6 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
-    implementation("org.springframework.ai:spring-ai-ollama-spring-boot-starter")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
@@ -49,6 +49,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion")
+
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocOpenAPIVersion")
 }
 
 dependencyManagement {
