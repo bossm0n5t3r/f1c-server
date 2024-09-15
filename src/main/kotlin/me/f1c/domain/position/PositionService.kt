@@ -62,4 +62,13 @@ class PositionService(
             LOGGER.error("${LogResult.FAILED.name} rankings: {}, {}, ", sessionKey, e.message, e)
             throw e
         }
+
+    fun findAllBySessionKey(sessionKey: Int): List<PositionDto> =
+        runCatching {
+            positionRepository.findAllBySessionKey(sessionKey)
+        }.onSuccess {
+            LOGGER.info("${LogResult.SUCCEEDED.name} findAllBySessionKey: {}, {}", sessionKey, it.size)
+        }.onFailure {
+            LOGGER.error("${LogResult.FAILED.name} findAllBySessionKey: {}, {}, ", sessionKey, it.message, it)
+        }.getOrThrow()
 }
