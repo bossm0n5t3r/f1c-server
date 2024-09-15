@@ -14,5 +14,5 @@ class AdminControllerImpl(
     private val adminService: AdminService,
 ) : AdminController {
     @GetMapping("/up-to-date")
-    override fun upToDate(): ResponseDto<Int> = adminService.upToDate().toResponseDto()
+    override fun upToDate(): ResponseDto<Unit> = adminService.upToDate().toResponseDto()
 }
