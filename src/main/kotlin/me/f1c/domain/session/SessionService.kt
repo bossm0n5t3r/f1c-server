@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
 import me.f1c.domain.OpenF1API.SESSION_API
+import me.f1c.exception.F1CBadRequestException
 import me.f1c.port.session.SessionRepository
 import me.f1c.util.ObjectMapperUtil.objectMapper
 import org.springframework.stereotype.Service
@@ -61,4 +62,29 @@ class SessionService(
         }.onFailure {
             LOGGER.error("${LogResult.FAILED.name} findAllSessionKeys: {}, ", it.message, it)
         }.getOrThrow()
+
+    fun getLatest(rawSessionName: String?): SessionDto? =
+        try {
+            val sessionName = validateRawSessionName(rawSessionName)
+
+            val result =
+                if (sessionName == null) {
+                    sessionRepository.findLatestSession()
+                } else {
+                    sessionRepository.findLatestSession(sessionName)
+                }
+
+            LOGGER.info("${LogResult.SUCCEEDED.name} getLatest: {}, {}, {}", rawSessionName, sessionName, result)
+            result
+        } catch (e: Exception) {
+            LOGGER.error("${LogResult.FAILED.name} getLatest: {}, {}, ", rawSessionName, e.message, e)
+            throw e
+        }
+
+    private fun validateRawSessionName(rawSessionName: String?): SessionName? =
+        try {
+            rawSessionName?.let { SessionName.fromSearchValue(it) }
+        } catch (e: Exception) {
+            throw F1CBadRequestException("Invalid sessionName Request Parameter", "sessionName" to rawSessionName)
+        }
 }

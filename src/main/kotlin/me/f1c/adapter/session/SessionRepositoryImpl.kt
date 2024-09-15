@@ -3,6 +3,7 @@ package me.f1c.adapter.session
 import kotlinx.datetime.toKotlinLocalDateTime
 import me.f1c.domain.session.SessionDto
 import me.f1c.domain.session.SessionEntity
+import me.f1c.domain.session.SessionName
 import me.f1c.domain.session.Sessions
 import me.f1c.domain.session.toDto
 import me.f1c.port.session.SessionRepository
@@ -52,6 +53,17 @@ class SessionRepositoryImpl(
         transaction(database) {
             Sessions
                 .selectAll()
+                .orderBy(Sessions.dateStart to SortOrder.DESC)
+                .run { SessionEntity.wrapRows(this) }
+                .firstOrNull()
+                ?.toDto()
+        }
+
+    override fun findLatestSession(sessionName: SessionName): SessionDto? =
+        transaction(database) {
+            Sessions
+                .selectAll()
+                .where { Sessions.sessionName eq sessionName.searchValue }
                 .orderBy(Sessions.dateStart to SortOrder.DESC)
                 .run { SessionEntity.wrapRows(this) }
                 .firstOrNull()

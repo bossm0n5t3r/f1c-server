@@ -11,4 +11,6 @@ interface SessionController {
     fun findBySessionKey(sessionKey: Int): ResponseDto<SessionDto?>
 
     fun findAllSessionKeys(): ResponseDto<List<Int>>
+
+    fun getLatest(sessionName: String?): ResponseDto<SessionDto?>
 }

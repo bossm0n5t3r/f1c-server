@@ -1,0 +1,15 @@
+meta {
+  name: Get Latest Session By Session Name
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{API_URL}}/sessions/latest?sessionName=Sprint Qualifying
+  body: none
+  auth: none
+}
+
+params:query {
+  sessionName: Sprint Qualifying
+}
