@@ -1,8 +1,11 @@
 package me.f1c.domain.pit
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.math.BigDecimal
 
-data class PitDto(
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+data class OpenF1PitDto(
     val sessionKey: Int,
     val meetingKey: Int,
     val date: String,

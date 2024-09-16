@@ -23,7 +23,7 @@ class PitService(
                     .retrieve()
                     .toEntity(String::class.java)
             val bodyString = rawResponse.body ?: error("Body does not exist")
-            val pitDtoList = objectMapper.readValue<List<PitDto>>(bodyString)
+            val pitDtoList = objectMapper.readValue<List<OpenF1PitDto>>(bodyString).map { it.toDto() }
             pitRepository.batchInsert(pitDtoList)
         }.onSuccess {
             LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}, {}", sessionKey, it)

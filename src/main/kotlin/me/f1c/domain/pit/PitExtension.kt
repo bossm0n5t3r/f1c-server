@@ -9,3 +9,13 @@ fun PitEntity.toDto() =
         pitDuration,
         lapNumber,
     )
+
+fun OpenF1PitDto.toDto() =
+    PitDto(
+        sessionKey,
+        meetingKey,
+        date,
+        driverNumber,
+        pitDuration,
+        lapNumber,
+    )
