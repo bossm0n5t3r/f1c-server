@@ -8,3 +8,12 @@ fun PositionEntity.toDto() =
         driverNumber,
         position,
     )
+
+fun OpenF1PositionDto.toDto() =
+    PositionDto(
+        date,
+        meetingKey,
+        sessionKey,
+        driverNumber,
+        position,
+    )

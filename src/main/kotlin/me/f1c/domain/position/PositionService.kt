@@ -26,7 +26,7 @@ class PositionService(
                     .retrieve()
                     .toEntity(String::class.java)
             val bodyString = rawResponse.body ?: error("Body does not exist")
-            val pitDtoList = objectMapper.readValue<List<PositionDto>>(bodyString)
+            val pitDtoList = objectMapper.readValue<List<OpenF1PositionDto>>(bodyString).map { it.toDto() }
             positionRepository.batchInsert(pitDtoList)
         }.onSuccess {
             LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}, {}", sessionKey, it)
