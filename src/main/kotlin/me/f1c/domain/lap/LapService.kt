@@ -16,6 +16,7 @@ class LapService(
 ) {
     fun upToDate(sessionKey: Int): Int =
         runCatching {
+            if (lapRepository.findAllBySessionKey(sessionKey).isNotEmpty()) return@runCatching 0
             val rawResponse =
                 restClient
                     .get()
