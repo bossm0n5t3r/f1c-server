@@ -1,11 +1,14 @@
 package me.f1c.adapter.lap
 
 import me.f1c.domain.lap.LapDto
+import me.f1c.domain.lap.LapEntity
 import me.f1c.domain.lap.Laps
+import me.f1c.domain.lap.toDto
 import me.f1c.port.lap.LapRepository
 import me.f1c.util.DateTimeUtil.toKotlinLocalDateTime
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.batchInsert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 
@@ -34,4 +37,13 @@ class LapRepositoryImpl(
                 this[Laps.lapNumber] = it.lapNumber
             }
         }.size
+
+    override fun findAllBySessionKey(sessionKey: Int): List<LapDto> =
+        transaction(database) {
+            Laps
+                .selectAll()
+                .where { Laps.sessionKey eq sessionKey }
+                .run { LapEntity.wrapRows(this) }
+                .map { it.toDto() }
+        }
 }
