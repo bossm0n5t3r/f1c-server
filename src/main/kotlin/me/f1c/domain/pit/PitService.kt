@@ -16,6 +16,7 @@ class PitService(
 ) {
     fun upToDate(sessionKey: Int): Int =
         runCatching {
+            if (pitRepository.findAllBySessionKey(sessionKey).isNotEmpty()) return@runCatching 0
             val rawResponse =
                 restClient
                     .get()
