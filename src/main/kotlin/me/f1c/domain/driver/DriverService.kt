@@ -25,6 +25,7 @@ class DriverService(
 
     fun upToDate(sessionKey: Int): Int =
         runCatching {
+            if (driverRepository.findAllBySessionKey(sessionKey).isNotEmpty()) return@runCatching 0
             val rawResponse =
                 restClient
                     .get()
