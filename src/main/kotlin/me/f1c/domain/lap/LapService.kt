@@ -23,7 +23,7 @@ class LapService(
                     .retrieve()
                     .toEntity(String::class.java)
             val bodyString = rawResponse.body ?: error("Body does not exist")
-            val lapDtoList = objectMapper.readValue<List<LapDto>>(bodyString)
+            val lapDtoList = objectMapper.readValue<List<OpenF1LapDto>>(bodyString).map { it.toDto() }
             lapRepository.batchInsert(lapDtoList)
         }.onSuccess {
             LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}, {}", sessionKey, it)

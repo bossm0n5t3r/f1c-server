@@ -1,8 +1,12 @@
 package me.f1c.domain.lap
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.math.BigDecimal
 
-data class LapDto(
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+data class OpenF1LapDto(
     val meetingKey: Int,
     val sessionKey: Int,
     val driverNumber: Int,
@@ -12,11 +16,17 @@ data class LapDto(
     val dateStart: String?,
     val lapDuration: BigDecimal?,
     val isPitOutLap: Boolean,
+    @JsonProperty("duration_sector_1")
     val durationSector1: BigDecimal?,
+    @JsonProperty("duration_sector_2")
     val durationSector2: BigDecimal?,
+    @JsonProperty("duration_sector_3")
     val durationSector3: BigDecimal?,
+    @JsonProperty("segments_sector_1")
     val segmentsSector1: List<Int?>,
+    @JsonProperty("segments_sector_2")
     val segmentsSector2: List<Int?>,
+    @JsonProperty("segments_sector_3")
     val segmentsSector3: List<Int?>,
     val lapNumber: Int,
 )
