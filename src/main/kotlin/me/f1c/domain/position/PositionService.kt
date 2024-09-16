@@ -38,7 +38,7 @@ class PositionService(
         try {
             val drivers =
                 driverRepository
-                    .findAll(sessionKey)
+                    .findAllBySessionKey(sessionKey)
                     .takeIf { it.isNotEmpty() }
                     ?: error("Drivers is empty")
 

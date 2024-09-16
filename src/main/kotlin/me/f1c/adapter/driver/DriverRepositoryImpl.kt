@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository
 class DriverRepositoryImpl(
     private val database: Database,
 ) : DriverRepository {
-    override fun findAll(sessionKey: Int): List<DriverDto> =
+    override fun findAllBySessionKey(sessionKey: Int): List<DriverDto> =
         transaction(database) {
             Drivers
                 .selectAll()

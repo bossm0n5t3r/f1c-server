@@ -16,7 +16,7 @@ class DriverService(
 ) {
     fun findAll(sessionKey: Int): List<DriverDto> =
         runCatching {
-            driverRepository.findAll(sessionKey)
+            driverRepository.findAllBySessionKey(sessionKey)
         }.onSuccess {
             LOGGER.info("${LogResult.SUCCEEDED.name} findAll: {}, {}", sessionKey, it.size)
         }.onFailure {
