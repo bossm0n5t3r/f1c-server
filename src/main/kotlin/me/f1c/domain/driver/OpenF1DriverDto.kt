@@ -1,6 +1,10 @@
 package me.f1c.domain.driver
 
-data class DriverDto(
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+data class OpenF1DriverDto(
     val driverNumber: Int,
     val sessionKey: Int,
     val meetingKey: Int,

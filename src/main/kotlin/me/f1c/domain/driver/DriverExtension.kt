@@ -15,3 +15,19 @@ fun DriverEntity.toDto() =
         teamName,
         nameAcronym,
     )
+
+fun OpenF1DriverDto.toDto() =
+    DriverDto(
+        driverNumber,
+        sessionKey,
+        meetingKey,
+        broadcastName,
+        countryCode,
+        firstName,
+        lastName,
+        fullName,
+        headshotUrl,
+        teamColour,
+        teamName,
+        nameAcronym,
+    )

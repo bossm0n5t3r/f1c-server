@@ -32,7 +32,7 @@ class DriverService(
                     .retrieve()
                     .toEntity(String::class.java)
             val bodyString = rawResponse.body ?: error("Body does not exist")
-            val driverDtoList = objectMapper.readValue<List<DriverDto>>(bodyString)
+            val driverDtoList = objectMapper.readValue<List<OpenF1DriverDto>>(bodyString).map { it.toDto() }
             driverRepository.batchInsert(driverDtoList)
         }.onSuccess {
             LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}, {}", sessionKey, it)
