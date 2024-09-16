@@ -9,6 +9,7 @@ import me.f1c.port.session.SessionRepository
 import me.f1c.util.ObjectMapperUtil.objectMapper
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
+import java.time.LocalDate
 
 @Service
 class SessionService(
@@ -17,14 +18,15 @@ class SessionService(
 ) {
     fun upToDate() =
         runCatching {
+            val thisYear = LocalDate.now().year
             val rawResponse =
                 restClient
                     .get()
-                    .uri("${SESSION_API}?year=2024")
+                    .uri("${SESSION_API}?year=$thisYear")
                     .retrieve()
                     .toEntity(String::class.java)
             val bodyString = rawResponse.body ?: error("Body does not exist")
-            val sessionDtoList = objectMapper.readValue<List<SessionDto>>(bodyString)
+            val sessionDtoList = objectMapper.readValue<List<OpenF1SessionDto>>(bodyString).map { it.toDto() }
             val allSessionKeys = this.findAllSessionKeys().toSet()
             val filteredSessionDtoList =
                 sessionDtoList

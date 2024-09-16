@@ -1,6 +1,10 @@
 package me.f1c.domain.session
 
-data class SessionDto(
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+data class OpenF1SessionDto(
     val sessionKey: Int,
     val sessionName: String,
     val dateStart: String,
