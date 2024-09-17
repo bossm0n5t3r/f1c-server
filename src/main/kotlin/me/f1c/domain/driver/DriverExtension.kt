@@ -1,5 +1,7 @@
 package me.f1c.domain.driver
 
+import me.f1c.domain.driver.DriverConstants.DRIVER_FULL_NAME_TO_KOREAN_DRIVER_NAME
+
 fun DriverEntity.toDto() =
     DriverDto(
         driverNumber,
@@ -14,6 +16,7 @@ fun DriverEntity.toDto() =
         teamColour,
         teamName,
         nameAcronym,
+        DRIVER_FULL_NAME_TO_KOREAN_DRIVER_NAME[fullName],
     )
 
 fun OpenF1DriverDto.toDto() =
@@ -30,4 +33,5 @@ fun OpenF1DriverDto.toDto() =
         teamColour,
         teamName,
         nameAcronym,
+        null,
     )

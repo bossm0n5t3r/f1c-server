@@ -13,4 +13,5 @@ data class DriverDto(
     val teamColour: String?,
     val teamName: String?,
     val nameAcronym: String,
+    val fullNameKo: String?,
 )
