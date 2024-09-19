@@ -18,5 +18,5 @@ class SummaryControllerImpl(
     @GetMapping("/sessions/{sessionKey}")
     override fun getSessionSummary(
         @PathVariable sessionKey: Int,
-    ): ResponseDto<AiSessionSummaryDto> = summaryService.getSessionSummary(sessionKey).toResponseDto()
+    ): ResponseDto<AiSessionSummaryDto?> = summaryService.getSessionSummary(sessionKey).toResponseDto()
 }

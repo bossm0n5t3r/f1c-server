@@ -4,5 +4,5 @@ import me.f1c.domain.ResponseDto
 import me.f1c.domain.chat.AiSessionSummaryDto
 
 interface SummaryController {
-    fun getSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
+    fun getSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto?>
 }
