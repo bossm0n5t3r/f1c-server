@@ -33,7 +33,7 @@ class AdminService(
                     positionService.upToDate(sessionKey)
                     updatedSessionKeyFromPosition.add(sessionKey)
                 }
-                if (summaryService.getSessionSummary(sessionKey) == null) {
+                if (summaryService.getSessionSummary(sessionKey).isEmpty()) {
                     summaryService.createSessionSummary(sessionKey)
                     updatedSessionKeyFromSummary.add(sessionKey)
                 }

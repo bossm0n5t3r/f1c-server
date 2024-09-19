@@ -1,11 +1,13 @@
 package me.f1c.domain.summary
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
 import me.f1c.domain.chat.AiSessionSummaryDto
 import me.f1c.domain.chat.AiSummaryService
 import me.f1c.port.driver.DriverRepository
 import me.f1c.port.position.PositionRepository
+import me.f1c.util.ObjectMapperUtil
 import org.springframework.stereotype.Service
 
 @Service
@@ -47,9 +49,18 @@ class SummaryService(
             throw e
         }
 
-    fun getSessionSummary(sessionKey: Int): AiSessionSummaryDto? {
-        val result = aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey)
-        LOGGER.info("${LogResult.SUCCEEDED} getSessionSummary: {}", sessionKey)
-        return result
-    }
+    fun getSessionSummary(sessionKey: Int): List<String> =
+        try {
+            val result =
+                aiSummaryService
+                    .findLatestSessionSummaryBySessionKey(sessionKey)
+                    ?.summary
+                    ?.let { ObjectMapperUtil.objectMapper.readValue<List<String>>(it) }
+                    ?: emptyList()
+            LOGGER.info("${LogResult.SUCCEEDED} getSessionSummary: {}", sessionKey)
+            result
+        } catch (e: Exception) {
+            LOGGER.error("${LogResult.FAILED} getSessionSummary: {}, {}, ", sessionKey, e.message, e)
+            emptyList()
+        }
 }
