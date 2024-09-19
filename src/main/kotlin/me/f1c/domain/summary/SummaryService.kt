@@ -47,13 +47,9 @@ class SummaryService(
             throw e
         }
 
-    fun getSessionSummary(sessionKey: Int): AiSessionSummaryDto =
-        try {
-            val result = requireNotNull(aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey))
-            LOGGER.info("${LogResult.SUCCEEDED} getSessionSummary: {}", sessionKey)
-            result
-        } catch (e: Exception) {
-            LOGGER.error("${LogResult.FAILED} getSessionSummary: {}, {}, ", sessionKey, e.message, e)
-            throw e
-        }
+    fun getSessionSummary(sessionKey: Int): AiSessionSummaryDto? {
+        val result = aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey)
+        LOGGER.info("${LogResult.SUCCEEDED} getSessionSummary: {}", sessionKey)
+        return result
+    }
 }
