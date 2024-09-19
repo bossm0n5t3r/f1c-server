@@ -5,6 +5,7 @@ import me.f1c.configuration.LogResult
 import me.f1c.domain.driver.DriverService
 import me.f1c.domain.position.PositionService
 import me.f1c.domain.session.SessionService
+import me.f1c.domain.summary.SummaryService
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,6 +13,7 @@ class AdminService(
     private val sessionService: SessionService,
     private val driverService: DriverService,
     private val positionService: PositionService,
+    private val summaryService: SummaryService,
 ) {
     fun upToDate() =
         try {
@@ -21,6 +23,7 @@ class AdminService(
             val allSessionKeys = sessionService.findAll().map { it.sessionKey }.distinct()
             val updatedSessionKeyFromDriver = mutableListOf<Int>()
             val updatedSessionKeyFromPosition = mutableListOf<Int>()
+            val updatedSessionKeyFromSummary = mutableListOf<Int>()
             for (sessionKey in allSessionKeys) {
                 if (driverService.findAll(sessionKey).isEmpty()) {
                     driverService.upToDate(sessionKey)
@@ -30,8 +33,17 @@ class AdminService(
                     positionService.upToDate(sessionKey)
                     updatedSessionKeyFromPosition.add(sessionKey)
                 }
+                if (summaryService.getSessionSummary(sessionKey) == null) {
+                    summaryService.createSessionSummary(sessionKey)
+                    updatedSessionKeyFromSummary.add(sessionKey)
+                }
             }
-            LOGGER.info("${LogResult.SUCCEEDED} upToDate: {}, {}", updatedSessionKeyFromDriver.size, updatedSessionKeyFromPosition.size)
+            LOGGER.info(
+                "${LogResult.SUCCEEDED} upToDate: {}, {}, {}",
+                updatedSessionKeyFromDriver.size,
+                updatedSessionKeyFromPosition.size,
+                updatedSessionKeyFromSummary.size,
+            )
         } catch (e: Exception) {
             LOGGER.error("${LogResult.FAILED} upToDate: {}, ", e.message, e)
             throw e
