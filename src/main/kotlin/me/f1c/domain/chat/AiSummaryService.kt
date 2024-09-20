@@ -22,11 +22,6 @@ class AiSummaryService(
 ) {
     fun createSessionSummary(
         sessionKey: Int,
-        vararg parameters: Pair<String, String>,
-    ): AiSessionSummaryDto = createSessionSummary(sessionKey, parameters.toMap())
-
-    fun createSessionSummary(
-        sessionKey: Int,
         parameters: Map<String, String>,
     ): AiSessionSummaryDto =
         try {
@@ -55,15 +50,28 @@ class AiSummaryService(
             throw e
         }
 
-    fun updateSessionSummary(aiSessionSummaryDto: AiSessionSummaryDto): AiSessionSummaryDto =
+    fun updateSessionSummary(
+        aiSessionSummaryDto: AiSessionSummaryDto,
+        parameters: Map<String, String>,
+    ): AiSessionSummaryDto =
         try {
-            val answer = aiChat.chatWithClient(aiSessionSummaryDto.prompt)
+            var summaryRequest = sessionSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
+            for ((key, value) in parameters) {
+                summaryRequest = summaryRequest.replace("{$key}", value)
+            }
+            val prompt =
+                if (summaryRequest != aiSessionSummaryDto.prompt) {
+                    summaryRequest
+                } else {
+                    aiSessionSummaryDto.prompt
+                }
+            val answer = aiChat.chatWithClient(prompt)
             val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(answer)
 
             val createAiSessionSummaryDto =
                 CreateAiSessionSummaryDto(
                     aiSessionSummaryDto.sessionKey,
-                    aiSessionSummaryDto.prompt,
+                    prompt,
                     ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
                     aiSessionSummaryDto.revision + 1,
                 )
