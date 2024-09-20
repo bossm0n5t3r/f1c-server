@@ -49,9 +49,9 @@ class AiSummaryService(
 
             requireNotNull(
                 saved,
-            ).also { LOGGER.info("${LogResult.SUCCEEDED} createSessionSummary: {}, {}, {}", sessionKey, parameters, it.revision) }
+            ).also { LOGGER.info("${LogResult.SUCCEEDED} createSessionSummary: {}, {}", sessionKey, it.revision) }
         } catch (e: Exception) {
-            LOGGER.error("${LogResult.FAILED} createSessionSummary: {}, {}, {}, ", sessionKey, parameters, e.message, e)
+            LOGGER.error("${LogResult.FAILED} createSessionSummary: {}, {}, ", sessionKey, e.message, e)
             throw e
         }
 
