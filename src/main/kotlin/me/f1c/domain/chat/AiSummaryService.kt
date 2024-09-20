@@ -1,6 +1,8 @@
 package me.f1c.domain.chat
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import me.f1c.configuration.LOGGER
+import me.f1c.configuration.LogResult
 import me.f1c.domain.ResponseDto
 import me.f1c.port.chat.AiChat
 import me.f1c.port.chat.AiSessionSummaryRepository
@@ -26,26 +28,67 @@ class AiSummaryService(
     fun createSessionSummary(
         sessionKey: Int,
         parameters: Map<String, String>,
-    ): AiSessionSummaryDto {
-        val answer = aiChat.chatWithClient(sessionSummaryPromptTemplate, parameters)
-        val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(answer)
-        var summaryRequest = sessionSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
-        for ((key, value) in parameters) {
-            summaryRequest = summaryRequest.replace("{$key}", value)
+    ): AiSessionSummaryDto =
+        try {
+            val answer = aiChat.chatWithClient(sessionSummaryPromptTemplate, parameters)
+            val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(answer)
+            var summaryRequest = sessionSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
+            for ((key, value) in parameters) {
+                summaryRequest = summaryRequest.replace("{$key}", value)
+            }
+
+            val createAiSessionSummaryDto =
+                CreateAiSessionSummaryDto(
+                    sessionKey,
+                    summaryRequest,
+                    ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
+                )
+
+            val savedId = aiSessionSummaryRepository.save(createAiSessionSummaryDto)
+            val saved = aiSessionSummaryRepository.findById(savedId)
+
+            requireNotNull(
+                saved,
+            ).also { LOGGER.info("${LogResult.SUCCEEDED} createSessionSummary: {}, {}, {}", sessionKey, parameters, it.revision) }
+        } catch (e: Exception) {
+            LOGGER.error("${LogResult.FAILED} createSessionSummary: {}, {}, {}, ", sessionKey, parameters, e.message, e)
+            throw e
         }
 
-        val createAiSessionSummaryDto =
-            CreateAiSessionSummaryDto(
-                sessionKey,
-                summaryRequest,
-                ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
+    fun updateSessionSummary(aiSessionSummaryDto: AiSessionSummaryDto): AiSessionSummaryDto =
+        try {
+            val answer = aiChat.chatWithClient(aiSessionSummaryDto.prompt)
+            val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(answer)
+
+            val createAiSessionSummaryDto =
+                CreateAiSessionSummaryDto(
+                    aiSessionSummaryDto.sessionKey,
+                    aiSessionSummaryDto.prompt,
+                    ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
+                    aiSessionSummaryDto.revision + 1,
+                )
+
+            val savedId = aiSessionSummaryRepository.save(createAiSessionSummaryDto)
+            val saved = aiSessionSummaryRepository.findById(savedId)
+
+            requireNotNull(saved).also {
+                LOGGER.info(
+                    "${LogResult.SUCCEEDED} updateSessionSummary: {}, {}, {}",
+                    aiSessionSummaryDto.sessionKey,
+                    aiSessionSummaryDto.revision,
+                    it.revision,
+                )
+            }
+        } catch (e: Exception) {
+            LOGGER.error(
+                "${LogResult.FAILED} updateSessionSummary: {}, {}, {}, ",
+                aiSessionSummaryDto.sessionKey,
+                aiSessionSummaryDto.revision,
+                e.message,
+                e,
             )
-
-        val savedId = aiSessionSummaryRepository.save(createAiSessionSummaryDto)
-        val saved = aiSessionSummaryRepository.findById(savedId)
-
-        return requireNotNull(saved)
-    }
+            throw e
+        }
 
     fun findLatestSessionSummaryBySessionKey(sessionKey: Int): AiSessionSummaryDto? =
         aiSessionSummaryRepository.findLatestBySessionKey(sessionKey)
