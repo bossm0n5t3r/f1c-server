@@ -4,6 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ErrorResponse(
-    val errorMessage: String,
+    val errorMessage: String? = null,
     val details: Map<String, Any?>? = null,
 )
