@@ -24,29 +24,12 @@ class SummaryService(
             val previousSessionSummary = aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey)
             require(previousSessionSummary == null) { "Session Summary Already Exists" }
 
-            val positions =
-                positionRepository
-                    .findAllBySessionKey(sessionKey)
-                    .takeIf { it.isNotEmpty() }
-                    ?: error("Not found positions")
-
-            val driverNumberToSortedPositions =
-                positions.groupBy { it.driverNumber }.mapValues { (_, positionsByDriver) ->
-                    positionsByDriver.sortedBy { it.date }.map { it.position }
-                }
-            val driverNumberToDriver = driverRepository.findAllBySessionKey(sessionKey).associateBy { it.driverNumber }
-
-            val promptData = StringBuilder()
-            for ((driverNumber, sortedPositions) in driverNumberToSortedPositions) {
-                promptData.append("driver_name: '${driverNumberToDriver[driverNumber]?.fullName}', ")
-                promptData.append("positions: $sortedPositions, ")
-                promptData.append("ranking: ${sortedPositions.last()}\n ")
-            }
+            val sessionSummaryParameters = getSessionSummaryParameters(sessionKey)
 
             val result =
                 aiSummaryService.createSessionSummary(
                     sessionKey,
-                    "data" to promptData.toString(),
+                    sessionSummaryParameters,
                 )
             LOGGER.info("${LogResult.SUCCEEDED} createSessionSummary: {}", sessionKey)
             result
@@ -54,6 +37,29 @@ class SummaryService(
             LOGGER.error("${LogResult.FAILED} createSessionSummary: {}, {}, ", sessionKey, e.message, e)
             throw F1CInternalServerErrorException(e)
         }
+
+    private fun getSessionSummaryParameters(sessionKey: Int): Map<String, String> {
+        val positions =
+            positionRepository
+                .findAllBySessionKey(sessionKey)
+                .takeIf { it.isNotEmpty() }
+                ?: error("Not found positions")
+
+        val driverNumberToSortedPositions =
+            positions.groupBy { it.driverNumber }.mapValues { (_, positionsByDriver) ->
+                positionsByDriver.sortedBy { it.date }.map { it.position }
+            }
+        val driverNumberToDriver = driverRepository.findAllBySessionKey(sessionKey).associateBy { it.driverNumber }
+
+        val promptData = StringBuilder()
+        for ((driverNumber, sortedPositions) in driverNumberToSortedPositions) {
+            promptData.append("driver_name: '${driverNumberToDriver[driverNumber]?.fullName}', ")
+            promptData.append("positions: $sortedPositions, ")
+            promptData.append("ranking: ${sortedPositions.last()}\n ")
+        }
+
+        return mapOf("data" to promptData.toString())
+    }
 
     fun getSessionSummary(sessionKey: Int): List<String> =
         try {
@@ -76,8 +82,9 @@ class SummaryService(
                 aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey)
                     ?: error("Not found latest session summary by session key")
 
+            val sessionSummaryParameters = getSessionSummaryParameters(sessionKey)
             aiSummaryService
-                .updateSessionSummary(previousSessionSummary)
+                .updateSessionSummary(previousSessionSummary, sessionSummaryParameters)
                 .also { LOGGER.info("${LogResult.SUCCEEDED} updateSessionSummary: {}, {}", sessionKey, it.revision) }
         } catch (e: Exception) {
             LOGGER.error("${LogResult.FAILED} updateSessionSummary: {}, {}, ", sessionKey, e.message, e)
