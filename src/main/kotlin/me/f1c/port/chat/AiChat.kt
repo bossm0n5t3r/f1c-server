@@ -7,4 +7,6 @@ interface AiChat {
         template: Resource,
         parameters: Map<String, String>,
     ): String
+
+    fun chatWithClient(prompt: String): String
 }

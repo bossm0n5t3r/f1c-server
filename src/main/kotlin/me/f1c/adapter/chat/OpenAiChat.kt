@@ -22,4 +22,11 @@ class OpenAiChat(
                 }
             }.call()
             .content()
+
+    override fun chatWithClient(prompt: String): String =
+        chatClient
+            .prompt()
+            .user(prompt)
+            .call()
+            .content()
 }
