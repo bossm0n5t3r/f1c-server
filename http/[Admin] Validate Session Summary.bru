@@ -1,0 +1,11 @@
+meta {
+  name: [Admin] Validate Session Summary
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{API_URL}}/admin/summaries/validation/sessions/{{SESSION_KEY}}
+  body: none
+  auth: none
+}

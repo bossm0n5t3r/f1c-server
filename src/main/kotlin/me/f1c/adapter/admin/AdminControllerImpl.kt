@@ -9,6 +9,7 @@ import me.f1c.port.admin.AdminController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -21,8 +22,21 @@ class AdminControllerImpl(
     @GetMapping("/up-to-date")
     override fun upToDate(): ResponseDto<Unit> = adminService.upToDate().toResponseDto()
 
-    @PostMapping("/sessions/{sessionKey}")
+    @PostMapping("/summaries/sessions/{sessionKey}")
     override fun createSessionSummary(
         @PathVariable sessionKey: Int,
     ): ResponseDto<AiSessionSummaryDto> = summaryService.createSessionSummary(sessionKey).toResponseDto()
+
+    @PutMapping("/summaries/sessions/{sessionKey}")
+    override fun updateSessionSummary(
+        @PathVariable sessionKey: Int,
+    ): ResponseDto<AiSessionSummaryDto> = summaryService.updateSessionSummary(sessionKey).toResponseDto()
+
+    @GetMapping("/summaries/validation/sessions")
+    override fun validateAllSessionSummaries(): ResponseDto<Unit> = summaryService.validateSessionSummaries().toResponseDto()
+
+    @GetMapping("/summaries/validation/sessions/{sessionKey}")
+    override fun validateSessionSummary(
+        @PathVariable sessionKey: Int,
+    ): ResponseDto<Boolean> = summaryService.validateSessionSummary(sessionKey).toResponseDto()
 }

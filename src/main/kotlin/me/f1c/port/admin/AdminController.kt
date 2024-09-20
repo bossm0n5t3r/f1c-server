@@ -7,4 +7,10 @@ interface AdminController {
     fun upToDate(): ResponseDto<Unit>
 
     fun createSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
+
+    fun updateSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
+
+    fun validateAllSessionSummaries(): ResponseDto<Unit>
+
+    fun validateSessionSummary(sessionKey: Int): ResponseDto<Boolean>
 }

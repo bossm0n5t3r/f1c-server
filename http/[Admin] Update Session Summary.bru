@@ -1,0 +1,11 @@
+meta {
+  name: [Admin] Update Session Summary
+  type: http
+  seq: 18
+}
+
+put {
+  url: {{API_URL}}/admin/summaries/sessions/{{SESSION_KEY}}
+  body: none
+  auth: none
+}
