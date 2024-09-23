@@ -1,12 +1,11 @@
 package me.f1c.domain.chat
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
-import me.f1c.domain.ResponseDto
 import me.f1c.port.chat.AiChat
 import me.f1c.port.chat.AiSessionSummaryRepository
 import me.f1c.port.chat.CreateAiSessionSummaryDto
+import me.f1c.port.chat.GeneratedSummaryDto
 import me.f1c.util.ObjectMapperUtil
 import org.springframework.ai.openai.api.OpenAiApi
 import org.springframework.beans.factory.annotation.Value
@@ -25,15 +24,14 @@ class AiSummaryService(
     fun generateSessionSummary(
         sessionKey: Int,
         parameters: Map<String, String>,
-    ) = aiChat.chatWithClient(sessionSummaryPromptTemplate, parameters)
+    ) = aiChat.generateSummaryWithClient(sessionSummaryPromptTemplate, parameters)
 
     fun createSessionSummary(
         sessionKey: Int,
         parameters: Map<String, String>,
-        summary: String,
+        generatedSummaryDto: GeneratedSummaryDto,
     ): AiSessionSummaryDto =
         try {
-            val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(summary)
             var summaryRequest = sessionSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
             for ((key, value) in parameters) {
                 summaryRequest = summaryRequest.replace("{$key}", value)
@@ -43,7 +41,7 @@ class AiSummaryService(
                 CreateAiSessionSummaryDto(
                     sessionKey,
                     summaryRequest,
-                    ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
+                    ObjectMapperUtil.objectMapper.writeValueAsString(generatedSummaryDto.data),
                     1,
                     chatModel,
                 )
@@ -74,14 +72,13 @@ class AiSummaryService(
                 } else {
                     aiSessionSummaryDto.prompt
                 }
-            val answer = aiChat.chatWithClient(prompt)
-            val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(answer)
+            val answer = aiChat.generateSummaryWithClient(prompt)
 
             val createAiSessionSummaryDto =
                 CreateAiSessionSummaryDto(
                     aiSessionSummaryDto.sessionKey,
                     prompt,
-                    ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
+                    ObjectMapperUtil.objectMapper.writeValueAsString(answer.data),
                     aiSessionSummaryDto.revision + 1,
                     chatModel,
                 )

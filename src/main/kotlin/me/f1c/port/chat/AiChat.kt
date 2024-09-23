@@ -3,10 +3,10 @@ package me.f1c.port.chat
 import org.springframework.core.io.Resource
 
 interface AiChat {
-    fun chatWithClient(
+    fun generateSummaryWithClient(
         template: Resource,
         parameters: Map<String, String>,
-    ): String
+    ): GeneratedSummaryDto
 
-    fun chatWithClient(prompt: String): String
+    fun generateSummaryWithClient(prompt: String): GeneratedSummaryDto
 }

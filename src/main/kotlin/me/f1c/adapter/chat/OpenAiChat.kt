@@ -1,6 +1,7 @@
 package me.f1c.adapter.chat
 
 import me.f1c.port.chat.AiChat
+import me.f1c.port.chat.GeneratedSummaryDto
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Component
@@ -9,10 +10,10 @@ import org.springframework.stereotype.Component
 class OpenAiChat(
     private val chatClient: ChatClient,
 ) : AiChat {
-    override fun chatWithClient(
+    override fun generateSummaryWithClient(
         template: Resource,
         parameters: Map<String, String>,
-    ): String =
+    ): GeneratedSummaryDto =
         chatClient
             .prompt()
             .user { userSpec ->
@@ -21,12 +22,12 @@ class OpenAiChat(
                     request.param(key, value)
                 }
             }.call()
-            .content()
+            .entity(GeneratedSummaryDto::class.java)
 
-    override fun chatWithClient(prompt: String): String =
+    override fun generateSummaryWithClient(prompt: String): GeneratedSummaryDto =
         chatClient
             .prompt()
             .user(prompt)
             .call()
-            .content()
+            .entity(GeneratedSummaryDto::class.java)
 }
