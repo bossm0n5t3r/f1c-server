@@ -10,6 +10,8 @@ import me.f1c.exception.F1CInternalServerErrorException
 import me.f1c.port.driver.DriverRepository
 import me.f1c.port.position.PositionRepository
 import me.f1c.util.ObjectMapperUtil
+import org.springframework.ai.openai.api.OpenAiApi
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,18 +20,22 @@ class SummaryService(
     private val driverRepository: DriverRepository,
     private val aiSummaryService: AiSummaryService,
     private val sessionService: SessionService,
+    @Value("\${spring.ai.openai.chat.options.model}") private val chatModel: OpenAiApi.ChatModel,
 ) {
     fun createSessionSummary(sessionKey: Int): AiSessionSummaryDto =
         try {
-            val previousSessionSummary = aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey)
+            val previousSessionSummary = aiSummaryService.findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
             require(previousSessionSummary == null) { "Session Summary Already Exists" }
 
             val sessionSummaryParameters = getSessionSummaryParameters(sessionKey)
+
+            val summary = aiSummaryService.generateSessionSummary(sessionKey, sessionSummaryParameters)
 
             val result =
                 aiSummaryService.createSessionSummary(
                     sessionKey,
                     sessionSummaryParameters,
+                    summary,
                 )
             LOGGER.info("${LogResult.SUCCEEDED} createSessionSummary: {}", sessionKey)
             result
@@ -65,7 +71,7 @@ class SummaryService(
         try {
             val result =
                 aiSummaryService
-                    .findLatestSessionSummaryBySessionKey(sessionKey)
+                    .findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
                     ?.summary
                     ?.let { ObjectMapperUtil.objectMapper.readValue<List<String>>(it) }
                     ?: emptyList()
@@ -79,7 +85,7 @@ class SummaryService(
     fun updateSessionSummary(sessionKey: Int): AiSessionSummaryDto =
         try {
             val previousSessionSummary =
-                aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey)
+                aiSummaryService.findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
                     ?: error("Not found latest session summary by session key")
 
             val sessionSummaryParameters = getSessionSummaryParameters(sessionKey)
@@ -109,7 +115,7 @@ class SummaryService(
     fun validateSessionSummary(sessionKey: Int): Boolean =
         try {
             val result =
-                aiSummaryService.findLatestSessionSummaryBySessionKey(sessionKey)
+                aiSummaryService.findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
                     ?: error("Not found latest session summary by session key")
             val parsedSummary = ObjectMapperUtil.objectMapper.readValue<List<String>>(result.summary)
             require(parsedSummary.isNotEmpty())

@@ -7,4 +7,5 @@ object AiSessionSummaries : BaseLongIdTable("ai_session_summaries") {
     val prompt = text("prompt")
     val summary = text("summary")
     val revision = integer("revision")
+    val chatModel = varchar("chat_model", 50)
 }

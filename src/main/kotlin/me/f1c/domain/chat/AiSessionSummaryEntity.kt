@@ -13,4 +13,5 @@ class AiSessionSummaryEntity(
     var prompt by AiSessionSummaries.prompt
     var summary by AiSessionSummaries.summary
     var revision by AiSessionSummaries.revision
+    var chatModel by AiSessionSummaries.chatModel
 }

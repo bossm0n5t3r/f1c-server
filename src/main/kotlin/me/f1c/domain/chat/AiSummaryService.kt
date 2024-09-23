@@ -8,6 +8,7 @@ import me.f1c.port.chat.AiChat
 import me.f1c.port.chat.AiSessionSummaryRepository
 import me.f1c.port.chat.CreateAiSessionSummaryDto
 import me.f1c.util.ObjectMapperUtil
+import org.springframework.ai.openai.api.OpenAiApi
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
@@ -19,14 +20,20 @@ class AiSummaryService(
     @Value("classpath:/session-summary-prompt-template.st")
     private val sessionSummaryPromptTemplate: Resource,
     private val aiChat: AiChat,
+    @Value("\${spring.ai.openai.chat.options.model}") private val chatModel: OpenAiApi.ChatModel,
 ) {
+    fun generateSessionSummary(
+        sessionKey: Int,
+        parameters: Map<String, String>,
+    ) = aiChat.chatWithClient(sessionSummaryPromptTemplate, parameters)
+
     fun createSessionSummary(
         sessionKey: Int,
         parameters: Map<String, String>,
+        summary: String,
     ): AiSessionSummaryDto =
         try {
-            val answer = aiChat.chatWithClient(sessionSummaryPromptTemplate, parameters)
-            val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(answer)
+            val sessionSummary = ObjectMapperUtil.objectMapper.readValue<ResponseDto<List<String>>>(summary)
             var summaryRequest = sessionSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
             for ((key, value) in parameters) {
                 summaryRequest = summaryRequest.replace("{$key}", value)
@@ -37,6 +44,8 @@ class AiSummaryService(
                     sessionKey,
                     summaryRequest,
                     ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
+                    1,
+                    chatModel,
                 )
 
             val savedId = aiSessionSummaryRepository.save(createAiSessionSummaryDto)
@@ -74,6 +83,7 @@ class AiSummaryService(
                     prompt,
                     ObjectMapperUtil.objectMapper.writeValueAsString(sessionSummary.data),
                     aiSessionSummaryDto.revision + 1,
+                    chatModel,
                 )
 
             val savedId = aiSessionSummaryRepository.save(createAiSessionSummaryDto)
@@ -98,6 +108,8 @@ class AiSummaryService(
             throw e
         }
 
-    fun findLatestSessionSummaryBySessionKey(sessionKey: Int): AiSessionSummaryDto? =
-        aiSessionSummaryRepository.findLatestBySessionKey(sessionKey)
+    fun findLatestSessionSummaryBySessionKeyAndChatModel(
+        sessionKey: Int,
+        chatModel: OpenAiApi.ChatModel,
+    ): AiSessionSummaryDto? = aiSessionSummaryRepository.findLatestBySessionKeyAndChatModel(sessionKey, chatModel)
 }
