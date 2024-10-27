@@ -30,5 +30,6 @@ object DriverConstants {
             "Valtteri BOTTAS" to "발테리 보타스",
             "Yuki TSUNODA" to "유키 츠노다",
             "ZHOU Guanyu" to "저우 관위",
+            "Liam LAWSON" to "리암 로슨",
         )
 }
