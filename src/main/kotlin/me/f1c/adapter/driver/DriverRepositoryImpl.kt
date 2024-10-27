@@ -6,6 +6,7 @@ import me.f1c.domain.driver.Drivers
 import me.f1c.domain.driver.toDto
 import me.f1c.port.driver.DriverRepository
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -41,4 +42,14 @@ class DriverRepositoryImpl(
                 this[Drivers.nameAcronym] = it.nameAcronym
             }
         }.size
+
+    override fun findAllByDriverNumberOrderBySessionKey(driverNumber: Int): List<DriverDto> =
+        transaction(database) {
+            Drivers
+                .selectAll()
+                .where { Drivers.driverNumber eq driverNumber }
+                .orderBy(Drivers.sessionKey, SortOrder.ASC)
+                .run { DriverEntity.wrapRows(this) }
+                .map { it.toDto() }
+        }
 }
