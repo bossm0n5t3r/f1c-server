@@ -14,4 +14,8 @@ data class DriverDto(
     val teamName: String?,
     val nameAcronym: String,
     val fullNameKo: String?,
-)
+) {
+    fun validate(): Boolean = countryCode != null && firstName != null && lastName != null && teamColour != null && teamName != null
+
+    fun updateFullNameKo(fullNameKo: String?): DriverDto = copy(fullNameKo = fullNameKo)
+}
