@@ -23,6 +23,7 @@ class OpenAiChat(
                 }
             }.call()
             .entity(GeneratedSummaryDto::class.java)
+            ?: GeneratedSummaryDto()
 
     override fun generateSummaryWithClient(prompt: String): GeneratedSummaryDto =
         chatClient
@@ -30,4 +31,5 @@ class OpenAiChat(
             .user(prompt)
             .call()
             .entity(GeneratedSummaryDto::class.java)
+            ?: GeneratedSummaryDto()
 }
