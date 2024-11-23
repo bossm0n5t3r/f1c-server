@@ -1,0 +1,16 @@
+meta {
+  name: Get Race Schedules By Year And Month
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{API_URL}}/schedules?year=2024&month=11
+  body: none
+  auth: none
+}
+
+params:query {
+  year: 2024
+  month: 11
+}
