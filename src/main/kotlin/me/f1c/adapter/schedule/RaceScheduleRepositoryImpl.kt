@@ -11,7 +11,6 @@ import me.f1c.domain.schedule.RaceScheduleEntity
 import me.f1c.domain.schedule.RaceSchedules
 import me.f1c.domain.schedule.toDto
 import me.f1c.port.schedule.RaceScheduleRepository
-import me.f1c.util.DateTimeUtil.toKotlinLocalDateTime
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
@@ -41,7 +40,7 @@ class RaceScheduleRepositoryImpl(
                     this[RaceSchedules.circuitId] = it.circuitId
                     this[RaceSchedules.circuitName] = it.circuitName
                     this[RaceSchedules.raceType] = it.raceType
-                    this[RaceSchedules.raceDatetime] = it.raceDatetime.toKotlinLocalDateTime()
+                    this[RaceSchedules.raceDatetime] = LocalDateTime.parse(it.raceDatetime)
                 }.size
         }
 
