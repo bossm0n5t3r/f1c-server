@@ -1,16 +1,19 @@
 package me.f1c.adapter.schedule
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.atTime
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import me.f1c.domain.schedule.RaceScheduleDto
 import me.f1c.domain.schedule.RaceScheduleEntity
 import me.f1c.domain.schedule.RaceSchedules
 import me.f1c.domain.schedule.toDto
 import me.f1c.port.schedule.RaceScheduleRepository
+import me.f1c.util.DateTimeUtil.SERVER_TIME_ZONE
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
@@ -28,6 +31,18 @@ class RaceScheduleRepositoryImpl(
                 .run { RaceScheduleEntity.wrapRows(this) }
                 .map { it.toDto() }
         }
+
+    override fun findLatest(): RaceScheduleDto? {
+        val now = Clock.System.now().toLocalDateTime(SERVER_TIME_ZONE)
+        return transaction(database) {
+            RaceSchedules
+                .selectAll()
+                .where { RaceSchedules.raceDatetime greaterEq now }
+                .firstOrNull()
+                ?.run { RaceScheduleEntity.wrapRow(this) }
+                ?.toDto()
+        }
+    }
 
     override fun batchInsert(raceScheduleDtoList: List<RaceScheduleDto>): Int =
         transaction(database) {
