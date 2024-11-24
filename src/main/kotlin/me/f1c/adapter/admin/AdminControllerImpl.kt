@@ -22,6 +22,9 @@ class AdminControllerImpl(
     @GetMapping("/up-to-date")
     override fun upToDate(): ResponseDto<Unit> = adminService.upToDate().toResponseDto()
 
+    @GetMapping("/up-to-date/schedule/race")
+    override fun upToDateRaceSchedule(): ResponseDto<Unit> = adminService.upToDateRaceSchedule().toResponseDto()
+
     @PostMapping("/summaries/sessions/{sessionKey}")
     override fun createSessionSummary(
         @PathVariable sessionKey: Int,
