@@ -10,6 +10,9 @@ spring:
       driver-class-name: org.postgresql.Driver
       username: postgres
       password: postgres
+  batch:
+    job:
+      name: ${job.name:NONE}
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
