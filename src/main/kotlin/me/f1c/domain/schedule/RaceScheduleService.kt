@@ -49,6 +49,16 @@ class RaceScheduleService(
             throw e
         }
 
+    fun findLatestFinished(): RaceScheduleDto? =
+        try {
+            raceScheduleRepository
+                .findLatestFinished()
+                .also { LOGGER.info("{} findLatestFinished", LogResult.SUCCEEDED) }
+        } catch (e: Exception) {
+            LOGGER.error("{} findLatestFinished: {}", LogResult.FAILED, e.message)
+            throw e
+        }
+
     fun upToDate(): Int =
         try {
             val now =
