@@ -65,7 +65,7 @@ class SessionService(
             LOGGER.error("${LogResult.FAILED.name} findAllSessionKeys: {}, ", it.message, it)
         }.getOrThrow()
 
-    fun getLatest(rawSessionName: String?): SessionDto? =
+    fun getLatest(rawSessionName: String? = null): SessionDto? =
         try {
             val sessionName = validateRawSessionName(rawSessionName)
 
