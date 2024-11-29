@@ -1,25 +1,21 @@
 package me.f1c.domain.schedule
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toLocalDateTime
+import me.f1c.adapter.external.JolpicaF1ClientImpl
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
-import me.f1c.domain.JolpicaF1API
 import me.f1c.exception.F1CBadRequestException
 import me.f1c.port.schedule.RaceScheduleRepository
 import me.f1c.util.DateTimeUtil.SERVER_TIME_ZONE
 import me.f1c.util.DateTimeUtil.toKotlinLocalDateTime
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClient
 
 @Service
 class RaceScheduleService(
-    private val restClient: RestClient,
+    private val jolpicaF1Client: JolpicaF1ClientImpl,
     private val raceScheduleRepository: RaceScheduleRepository,
-    private val objectMapper: ObjectMapper,
 ) {
     fun findAllByYearAndMonth(
         year: Int,
@@ -66,15 +62,11 @@ class RaceScheduleService(
                     .now()
                     .toLocalDateTime(SERVER_TIME_ZONE)
             val year = now.year
-            val raceApi = JolpicaF1API.getRaceApi(year)
-            val rawResponse =
-                restClient
-                    .get()
-                    .uri(raceApi)
-                    .retrieve()
-                    .toEntity(String::class.java)
-            val bodyString = rawResponse.body ?: error("Body does not exist")
-            val raceResponseDto = objectMapper.readValue<JolpicaF1RaceResponseDto>(bodyString)
+            val raceApi = jolpicaF1Client.getRaceApi(year)
+            val raceResponseDto =
+                requireNotNull(
+                    jolpicaF1Client.callGet(raceApi, JolpicaF1RaceResponseDto::class.java),
+                ) { "JolpicaF1RaceResponseDto does not exist" }
             val raceScheduleDtoList =
                 raceResponseDto
                     .mrData
