@@ -1,4 +1,4 @@
-package me.f1c.batch
+package me.f1c.domain.batch
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toInstant

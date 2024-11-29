@@ -1,4 +1,4 @@
-package me.f1c.batch
+package me.f1c.domain.batch
 
 data class JobLaunchRequest(
     val jobName: String,
