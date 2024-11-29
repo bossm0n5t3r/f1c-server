@@ -1,0 +1,17 @@
+meta {
+  name: [Batch] Execute Job
+  type: http
+  seq: 24
+}
+
+post {
+  url: {{API_URL}}/batch/execute-job
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "jobName": "upToDateJob"
+  }
+}
