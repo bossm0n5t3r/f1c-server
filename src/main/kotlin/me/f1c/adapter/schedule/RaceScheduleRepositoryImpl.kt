@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -15,6 +16,7 @@ import me.f1c.domain.schedule.toDto
 import me.f1c.port.schedule.RaceScheduleRepository
 import me.f1c.util.DateTimeUtil.SERVER_TIME_ZONE
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -38,6 +40,19 @@ class RaceScheduleRepositoryImpl(
             RaceSchedules
                 .selectAll()
                 .where { RaceSchedules.raceDatetime greaterEq now }
+                .firstOrNull()
+                ?.run { RaceScheduleEntity.wrapRow(this) }
+                ?.toDto()
+        }
+    }
+
+    override fun findLatestFinished(): RaceScheduleDto? {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+        return transaction(database) {
+            RaceSchedules
+                .selectAll()
+                .where { RaceSchedules.raceDatetime lessEq now }
+                .orderBy(RaceSchedules.raceDatetime, SortOrder.DESC)
                 .firstOrNull()
                 ?.run { RaceScheduleEntity.wrapRow(this) }
                 ?.toDto()

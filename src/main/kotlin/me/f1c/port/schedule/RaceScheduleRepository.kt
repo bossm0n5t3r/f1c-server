@@ -7,6 +7,8 @@ interface RaceScheduleRepository {
 
     fun findLatest(): RaceScheduleDto?
 
+    fun findLatestFinished(): RaceScheduleDto?
+
     fun batchInsert(raceScheduleDtoList: List<RaceScheduleDto>): Int
 
     fun findAllByRaceType(raceType: String): List<RaceScheduleDto>
