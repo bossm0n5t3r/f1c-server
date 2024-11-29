@@ -23,6 +23,7 @@ repositories {
 
 extra["springAiVersion"] = "1.0.0-SNAPSHOT"
 private val exposedVersion = "0.56.0"
+private val mockkVersion = "1.13.13"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -51,6 +52,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion")
+
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 dependencyManagement {
