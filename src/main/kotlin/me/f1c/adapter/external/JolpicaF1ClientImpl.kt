@@ -5,7 +5,6 @@ import me.f1c.port.external.ExternalF1Client
 import me.f1c.util.Constants.CONFLICT_ARROW
 import me.f1c.util.Constants.REQUEST_ARROW
 import me.f1c.util.Constants.RESPONSE_ARROW
-import me.f1c.util.ObjectMapperUtil.objectMapper
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -31,30 +30,25 @@ class JolpicaF1ClientImpl(
 
     fun getLastResultApi(season: Int) = "${JOLPICA_F1_API}/$season/last/results/?format=json"
 
-    override fun <T> callGet(
-        uri: String,
-        clazz: Class<T>,
-    ): T? {
-        val clazzSimpleName = clazz.simpleName
+    override fun getStringResponseOrNull(uri: String): String? {
         return try {
-            LOGGER.info("[{} {}] callGet: {}", REQUEST_ARROW, uri, clazzSimpleName)
+            LOGGER.info("[{} {}] callGet", REQUEST_ARROW, uri)
             val rawResponse =
                 restClient
                     .get()
                     .uri(uri)
                     .retrieve()
                     .toEntity(String::class.java)
-            LOGGER.info("[{} {}] callGet: {}, {}", RESPONSE_ARROW, uri, clazzSimpleName, rawResponse)
-            val bodyString = requireNotNull(rawResponse.body)
-            objectMapper.readValue(bodyString, clazz)
+            LOGGER.info("[{} {}] callGet: {}", RESPONSE_ARROW, uri, rawResponse)
+            return requireNotNull(rawResponse.body)
         } catch (e: HttpClientErrorException) {
-            LOGGER.error("[{} {}] callGet: {}, {}, ", RESPONSE_ARROW, uri, clazzSimpleName, e.message, e)
+            LOGGER.error("[{} {}] callGet: {}, ", RESPONSE_ARROW, uri, e.message, e)
             throw e
         } catch (e: HttpServerErrorException) {
-            LOGGER.warn("[{} {}] callGet: {}, {}, ", RESPONSE_ARROW, uri, clazzSimpleName, e.message, e)
+            LOGGER.warn("[{} {}] callGet: {}, ", RESPONSE_ARROW, uri, e.message, e)
             null
         } catch (e: Exception) {
-            LOGGER.error("[{} {}] callGet: {}, {}, ", CONFLICT_ARROW, uri, clazzSimpleName, e.message, e)
+            LOGGER.error("[{} {}] callGet: {}, ", CONFLICT_ARROW, uri, e.message, e)
             throw e
         }
     }

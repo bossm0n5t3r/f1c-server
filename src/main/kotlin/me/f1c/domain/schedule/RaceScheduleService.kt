@@ -6,7 +6,12 @@ import kotlinx.datetime.toLocalDateTime
 import me.f1c.adapter.external.JolpicaF1ClientImpl
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
+import me.f1c.domain.jolpica.DateTime
+import me.f1c.domain.jolpica.JolpicaF1ResponseDto
+import me.f1c.domain.jolpica.MRDataWithRaceTable
+import me.f1c.domain.jolpica.RaceDto
 import me.f1c.exception.F1CBadRequestException
+import me.f1c.port.external.callGet
 import me.f1c.port.schedule.RaceScheduleRepository
 import me.f1c.util.DateTimeUtil.SERVER_TIME_ZONE
 import me.f1c.util.DateTimeUtil.toKotlinLocalDateTime
@@ -65,7 +70,7 @@ class RaceScheduleService(
             val raceApi = jolpicaF1Client.getRaceApi(year)
             val raceResponseDto =
                 requireNotNull(
-                    jolpicaF1Client.callGet(raceApi, JolpicaF1RaceResponseDto::class.java),
+                    jolpicaF1Client.callGet<JolpicaF1ResponseDto<MRDataWithRaceTable>>(raceApi),
                 ) { "JolpicaF1RaceResponseDto does not exist" }
             val raceScheduleDtoList =
                 raceResponseDto
@@ -81,7 +86,7 @@ class RaceScheduleService(
             throw e
         }
 
-    private fun JolpicaF1RaceDto.toRaceScheduleDtoList(now: LocalDateTime): List<RaceScheduleDto> =
+    private fun RaceDto.toRaceScheduleDtoList(now: LocalDateTime): List<RaceScheduleDto> =
         listOfNotNull(
             this.firstPractice?.let { this.toRaceScheduleDto("FirstPractice", it, now) },
             this.secondPractice?.let { this.toRaceScheduleDto("SecondPractice", it, now) },
@@ -90,12 +95,12 @@ class RaceScheduleService(
             this.sprint?.let { this.toRaceScheduleDto("Sprint", it, now) },
             this.sprintQualifying?.let { this.toRaceScheduleDto("SprintQualifying", it, now) },
             this.sprintShootout?.let { this.toRaceScheduleDto("SprintShootout", it, now) },
-            this.toRaceScheduleDto("Race", JolpicaF1RaceDto.DateTime(this.date, this.time), now),
+            this.toRaceScheduleDto("Race", DateTime(this.date, this.time), now),
         )
 
-    private fun JolpicaF1RaceDto.toRaceScheduleDto(
+    private fun RaceDto.toRaceScheduleDto(
         raceType: String,
-        raceDateTime: JolpicaF1RaceDto.DateTime,
+        raceDateTime: DateTime,
         now: LocalDateTime,
     ): RaceScheduleDto =
         RaceScheduleDto(
@@ -109,7 +114,7 @@ class RaceScheduleService(
             (raceDateTime.toRaceDatetime() ?: now).toString(),
         )
 
-    private fun JolpicaF1RaceDto.DateTime.toRaceDatetime(): LocalDateTime? =
+    private fun DateTime.toRaceDatetime(): LocalDateTime? =
         try {
             "${this.date}T${this.time}".toKotlinLocalDateTime()
         } catch (e: Exception) {
