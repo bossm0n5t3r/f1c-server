@@ -28,5 +28,5 @@ data class RaceDto(
     @JsonProperty("SprintShootout")
     val sprintShootout: DateTime? = null,
     @JsonProperty("Results")
-    val results: List<RaceResultDto>? = null,
+    val results: List<ResultDto>? = null,
 )
