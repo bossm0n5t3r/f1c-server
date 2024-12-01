@@ -8,6 +8,8 @@ interface AdminController {
 
     fun upToDateRaceSchedule(): ResponseDto<Unit>
 
+    fun upToDateRaceResult(): ResponseDto<Unit>
+
     fun createSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
 
     fun updateSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
