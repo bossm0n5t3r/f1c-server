@@ -15,9 +15,9 @@ data class ResultDto(
     val constructor: Constructor,
     val grid: String? = null,
     val laps: String? = null,
-    val status: String? = null,
+    val status: String,
     @JsonProperty("Time")
     val time: Time? = null,
     @JsonProperty("FastestLap")
-    val fastestLap: FastestLap? = null,
+    val fastestLap: FastestLap,
 )
