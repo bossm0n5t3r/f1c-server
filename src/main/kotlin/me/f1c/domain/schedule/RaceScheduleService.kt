@@ -71,7 +71,7 @@ class RaceScheduleService(
             val raceResponseDto =
                 requireNotNull(
                     jolpicaF1Client.callGet<JolpicaF1ResponseDto<MRDataWithRaceTable>>(raceApi),
-                ) { "JolpicaF1RaceResponseDto does not exist" }
+                ) { "JolpicaF1ResponseDto<MRDataWithRaceTable> does not exist" }
             val raceScheduleDtoList =
                 raceResponseDto
                     .mrData
