@@ -10,11 +10,11 @@ import me.f1c.domain.jolpica.DateTime
 import me.f1c.domain.jolpica.JolpicaF1ResponseDto
 import me.f1c.domain.jolpica.MRDataWithRaceTable
 import me.f1c.domain.jolpica.RaceDto
+import me.f1c.domain.jolpica.toRaceDateTimeOrGivenTime
 import me.f1c.exception.F1CBadRequestException
 import me.f1c.port.external.callGet
 import me.f1c.port.schedule.RaceScheduleRepository
 import me.f1c.util.DateTimeUtil.SERVER_TIME_ZONE
-import me.f1c.util.DateTimeUtil.toKotlinLocalDateTime
 import org.springframework.stereotype.Service
 
 @Service
@@ -111,14 +111,6 @@ class RaceScheduleService(
             this.circuit.circuitId,
             this.circuit.circuitName,
             raceType,
-            (raceDateTime.toRaceDatetime() ?: now).toString(),
+            raceDateTime.toRaceDateTimeOrGivenTime(now).toString(),
         )
-
-    private fun DateTime.toRaceDatetime(): LocalDateTime? =
-        try {
-            "${this.date}T${this.time}".toKotlinLocalDateTime()
-        } catch (e: Exception) {
-            LOGGER.warn("Failed JolpicaF1RaceDto.DateTime.toRaceDatetime: {}, {}", this.date, this.time)
-            null
-        }
 }
