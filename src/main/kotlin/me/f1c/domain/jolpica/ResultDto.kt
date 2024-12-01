@@ -19,5 +19,5 @@ data class ResultDto(
     @JsonProperty("Time")
     val time: Time? = null,
     @JsonProperty("FastestLap")
-    val fastestLap: FastestLap,
+    val fastestLap: FastestLap? = null,
 )
