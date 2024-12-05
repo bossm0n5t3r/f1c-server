@@ -23,6 +23,8 @@ class JolpicaF1ClientImpl(
 
     fun getRaceApi(season: Int): String = "$JOLPICA_F1_API/$season/races/?format=json"
 
+    fun getDriverApi(season: Int): String = "$JOLPICA_F1_API/$season/drivers/?format=json"
+
     fun getResultApi(
         season: Int,
         round: Int,
