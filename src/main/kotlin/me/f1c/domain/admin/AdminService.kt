@@ -29,10 +29,6 @@ class AdminService(
             val updatedSessionKeyFromPosition = mutableListOf<Int>()
             val updatedSessionKeyFromSummary = mutableListOf<Int>()
             for (sessionKey in allSessionKeys) {
-                if (driverService.findAll(sessionKey).isEmpty()) {
-                    driverService.upToDate(sessionKey)
-                    updatedSessionKeyFromDriver.add(sessionKey)
-                }
                 if (positionService.findAllBySessionKey(sessionKey).isEmpty()) {
                     positionService.upToDate(sessionKey)
                     updatedSessionKeyFromPosition.add(sessionKey)
@@ -53,11 +49,9 @@ class AdminService(
             throw e
         }
 
-    fun upToDateRaceSchedule() {
-        raceScheduleService.upToDate()
-    }
+    fun upToDateRaceSchedule(): Int = raceScheduleService.upToDate()
 
-    fun upToDateRaceResult() {
-        raceResultService.upToDate()
-    }
+    fun upToDateRaceResult(): Int = raceResultService.upToDate()
+
+    fun upToDateDriver(): Int = driverService.upToDate()
 }
