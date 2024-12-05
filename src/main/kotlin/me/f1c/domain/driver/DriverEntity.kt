@@ -9,16 +9,13 @@ class DriverEntity(
 ) : BaseLongEntity(id, Drivers) {
     companion object : BaseLongEntityClass<DriverEntity>(Drivers)
 
-    var driverNumber by Drivers.driverNumber
-    var sessionKey by Drivers.sessionKey
-    var meetingKey by Drivers.meetingKey
-    var broadcastName by Drivers.broadcastName
-    var countryCode by Drivers.countryCode
-    var firstName by Drivers.firstName
-    var lastName by Drivers.lastName
-    var fullName by Drivers.fullName
-    var headshotUrl by Drivers.headshotUrl
-    var teamColour by Drivers.teamColour
-    var teamName by Drivers.teamName
-    var nameAcronym by Drivers.nameAcronym
+    var season by Drivers.season
+    var driverId by Drivers.driverId
+    var permanentNumber by Drivers.permanentNumber
+    var code by Drivers.code
+    var url by Drivers.url
+    var givenName by Drivers.givenName
+    var familyName by Drivers.familyName
+    var dateOfBirth by Drivers.dateOfBirth
+    var nationality by Drivers.nationality
 }

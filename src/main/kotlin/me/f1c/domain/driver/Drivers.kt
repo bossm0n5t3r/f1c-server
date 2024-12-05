@@ -1,18 +1,16 @@
 package me.f1c.domain.driver
 
 import me.f1c.domain.BaseLongIdTable
+import org.jetbrains.exposed.sql.kotlin.datetime.date
 
 object Drivers : BaseLongIdTable("drivers") {
-    val driverNumber = integer("driver_number")
-    val sessionKey = integer("session_key")
-    val meetingKey = integer("meeting_key")
-    val broadcastName = varchar("broadcast_name", 50)
-    val countryCode = varchar("country_code", 3).nullable()
-    val firstName = varchar("first_name", 50).nullable()
-    val lastName = varchar("last_name", 50).nullable()
-    val fullName = varchar("full_name", 50)
-    val headshotUrl = varchar("headshot_url", 500).nullable()
-    val teamColour = varchar("team_colour", 10).nullable()
-    val teamName = varchar("team_name", 50).nullable()
-    val nameAcronym = varchar("name_acronym", 50)
+    val season = integer("season")
+    val driverId = varchar("driver_id", 100)
+    val permanentNumber = integer("permanent_number").nullable()
+    val code = varchar("code", 10).nullable()
+    val url = varchar("url", 500).nullable()
+    val givenName = varchar("given_name", 100)
+    val familyName = varchar("family_name", 100)
+    val dateOfBirth = date("date_of_birth").nullable()
+    val nationality = varchar("nationality", 100).nullable()
 }
