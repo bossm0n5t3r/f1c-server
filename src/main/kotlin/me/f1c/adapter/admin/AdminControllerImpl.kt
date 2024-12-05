@@ -23,10 +23,13 @@ class AdminControllerImpl(
     override fun upToDate(): ResponseDto<Unit> = adminService.upToDate().toResponseDto()
 
     @GetMapping("/up-to-date/race/schedule")
-    override fun upToDateRaceSchedule(): ResponseDto<Unit> = adminService.upToDateRaceSchedule().toResponseDto()
+    override fun upToDateRaceSchedule(): ResponseDto<Int> = adminService.upToDateRaceSchedule().toResponseDto()
 
     @GetMapping("/up-to-date/race/result")
-    override fun upToDateRaceResult(): ResponseDto<Unit> = adminService.upToDateRaceResult().toResponseDto()
+    override fun upToDateRaceResult(): ResponseDto<Int> = adminService.upToDateRaceResult().toResponseDto()
+
+    @GetMapping("/up-to-date/driver")
+    override fun upToDateDriver(): ResponseDto<Int> = adminService.upToDateDriver().toResponseDto()
 
     @PostMapping("/summaries/sessions/{sessionKey}")
     override fun createSessionSummary(

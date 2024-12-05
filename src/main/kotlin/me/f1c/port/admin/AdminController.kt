@@ -6,9 +6,11 @@ import me.f1c.domain.chat.AiSessionSummaryDto
 interface AdminController {
     fun upToDate(): ResponseDto<Unit>
 
-    fun upToDateRaceSchedule(): ResponseDto<Unit>
+    fun upToDateRaceSchedule(): ResponseDto<Int>
 
-    fun upToDateRaceResult(): ResponseDto<Unit>
+    fun upToDateRaceResult(): ResponseDto<Int>
+
+    fun upToDateDriver(): ResponseDto<Int>
 
     fun createSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
 
