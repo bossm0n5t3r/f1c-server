@@ -1,37 +1,34 @@
 package me.f1c.domain.driver
 
-import me.f1c.domain.driver.DriverConstants.DRIVER_FULL_NAME_TO_KOREAN_DRIVER_NAME
+import kotlinx.datetime.LocalDate
+import me.f1c.domain.jolpica.Driver
 
-fun DriverEntity.toDto() =
-    DriverDto(
-        driverNumber,
-        sessionKey,
-        meetingKey,
-        broadcastName,
-        countryCode,
-        firstName,
-        lastName,
-        fullName,
-        headshotUrl,
-        teamColour,
-        teamName,
-        nameAcronym,
-        DRIVER_FULL_NAME_TO_KOREAN_DRIVER_NAME[fullName],
+fun DriverEntity.toDto(): DriverDto {
+    val driverInfo = DriverInfo.findByDriverIdOrNull(driverId)
+    return DriverDto(
+        season,
+        driverId,
+        permanentNumber,
+        code,
+        url,
+        givenName,
+        familyName,
+        dateOfBirth,
+        nationality,
+        driverInfo?.koreanDriverName,
+        driverInfo?.headshotUrl,
     )
+}
 
-fun OpenF1DriverDto.toDto() =
+fun Driver.toDriverDto(season: Int) =
     DriverDto(
-        driverNumber,
-        sessionKey,
-        meetingKey,
-        broadcastName,
-        countryCode,
-        firstName,
-        lastName,
-        fullName,
-        headshotUrl,
-        teamColour,
-        teamName,
-        nameAcronym,
-        null,
+        season,
+        driverId,
+        permanentNumber?.toInt(),
+        code,
+        url,
+        givenName,
+        familyName,
+        dateOfBirth?.let { LocalDate.parse(it) },
+        nationality,
     )

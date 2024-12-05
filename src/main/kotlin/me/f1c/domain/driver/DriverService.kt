@@ -1,43 +1,60 @@
 package me.f1c.domain.driver
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.datetime.Clock
+import kotlinx.datetime.toLocalDateTime
+import me.f1c.adapter.external.JolpicaF1ClientImpl
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
-import me.f1c.domain.OpenF1API.DRIVER_API
+import me.f1c.domain.jolpica.JolpicaF1ResponseDto
+import me.f1c.domain.jolpica.MRDataWithDriverTable
 import me.f1c.port.driver.DriverRepository
-import me.f1c.util.ObjectMapperUtil.objectMapper
+import me.f1c.port.external.callGet
+import me.f1c.util.DateTimeUtil.SERVER_TIME_ZONE
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClient
 
 @Service
 class DriverService(
-    private val restClient: RestClient,
+    private val jolpicaF1Client: JolpicaF1ClientImpl,
     private val driverRepository: DriverRepository,
 ) {
-    fun findAll(sessionKey: Int): List<DriverDto> =
-        runCatching {
-            driverRepository.findAllBySessionKey(sessionKey)
-        }.onSuccess {
-            LOGGER.info("${LogResult.SUCCEEDED.name} findAll: {}, {}", sessionKey, it.size)
-        }.onFailure {
-            LOGGER.error("${LogResult.FAILED.name} findAll: {}, {}, ", sessionKey, it.message, it)
-        }.getOrThrow()
+    fun findAllBySeason(season: Int): List<DriverDto> =
+        try {
+            driverRepository
+                .findAllBySeason(season)
+                .also { LOGGER.info("{} findAll: {}, {}", LogResult.SUCCEEDED, season, it.size) }
+        } catch (e: Exception) {
+            LOGGER.error("{} findAll: {}, {}, ", LogResult.FAILED, season, e.message, e)
+            throw e
+        }
 
-    fun upToDate(sessionKey: Int): Int =
-        runCatching {
-            if (driverRepository.findAllBySessionKey(sessionKey).isNotEmpty()) return@runCatching 0
-            val rawResponse =
-                restClient
-                    .get()
-                    .uri("$DRIVER_API?session_key=$sessionKey")
-                    .retrieve()
-                    .toEntity(String::class.java)
-            val bodyString = rawResponse.body ?: error("Body does not exist")
-            val driverDtoList = objectMapper.readValue<List<OpenF1DriverDto>>(bodyString).map { it.toDto() }
-            driverRepository.batchInsert(driverDtoList)
-        }.onSuccess {
-            LOGGER.info("${LogResult.SUCCEEDED.name} upToDate: {}, {}", sessionKey, it)
-        }.onFailure {
-            LOGGER.error("${LogResult.FAILED.name} upToDate: {}, {}, ", sessionKey, it.message, it)
-        }.getOrThrow()
+    fun upToDate(): Int {
+        fun Int.withSucceededInfoLog() = this.also { LOGGER.info("{} upToDate: {}", LogResult.SUCCEEDED, it) }
+
+        return try {
+            val now =
+                Clock.System
+                    .now()
+                    .toLocalDateTime(SERVER_TIME_ZONE)
+            val year = now.year
+            if (driverRepository.findAllBySeason(year).isNotEmpty()) {
+                return 0.withSucceededInfoLog()
+            }
+
+            val driverApi = jolpicaF1Client.getDriverApi(year)
+            val driverResponseDto =
+                requireNotNull(
+                    jolpicaF1Client.callGet<JolpicaF1ResponseDto<MRDataWithDriverTable>>(driverApi),
+                ) { "JolpicaF1ResponseDto<MRDataWithDriverTable> does not exist" }
+            val driverDtoList =
+                driverResponseDto
+                    .mrData
+                    .driverTable
+                    .drivers
+                    .map { it.toDriverDto(year) }
+            driverRepository.batchInsert(driverDtoList).withSucceededInfoLog()
+        } catch (e: Exception) {
+            LOGGER.error("{} upToDate: {}, ", LogResult.FAILED, e.message, e)
+            throw e
+        }
+    }
 }
