@@ -31,6 +31,9 @@ class AdminControllerImpl(
     @GetMapping("/up-to-date/driver")
     override fun upToDateDriver(): ResponseDto<Int> = adminService.upToDateDriver().toResponseDto()
 
+    @GetMapping("/up-to-date/constructor")
+    override fun upToDateConstructor(): ResponseDto<Int> = adminService.upToDateConstructor().toResponseDto()
+
     @PostMapping("/summaries/sessions/{sessionKey}")
     override fun createSessionSummary(
         @PathVariable sessionKey: Int,
