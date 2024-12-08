@@ -7,14 +7,13 @@ import kotlinx.datetime.toLocalDateTime
 import me.f1c.adapter.external.JolpicaF1ClientImpl
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
-import me.f1c.domain.jolpica.DateTime
 import me.f1c.domain.jolpica.JolpicaF1ResponseDto
 import me.f1c.domain.jolpica.MRDataWithRaceTable
-import me.f1c.domain.jolpica.RaceDto
-import me.f1c.domain.jolpica.ResultDto
 import me.f1c.domain.jolpica.SeasonAndRound
-import me.f1c.domain.jolpica.toRaceDateTimeOrGivenTime
 import me.f1c.domain.schedule.RaceScheduleService
+import me.f1c.port.circuit.CircuitRepository
+import me.f1c.port.constructor.ConstructorRepository
+import me.f1c.port.driver.DriverRepository
 import me.f1c.port.external.callGet
 import me.f1c.port.result.RaceResultRepository
 import me.f1c.util.Constants.END_ROUND
@@ -26,6 +25,9 @@ class RaceResultService(
     private val jolpicaF1Client: JolpicaF1ClientImpl,
     private val raceScheduleService: RaceScheduleService,
     private val raceResultRepository: RaceResultRepository,
+    private val driverRepository: DriverRepository,
+    private val constructorRepository: ConstructorRepository,
+    private val circuitRepository: CircuitRepository,
 ) {
     fun upToDate(): Int {
         return try {
@@ -78,52 +80,54 @@ class RaceResultService(
         return raceResultRepository.batchInsert(raceResultDtoList)
     }
 
-    private fun RaceDto.toRaceResultDtoList(now: LocalDateTime): List<RaceResultDto> {
-        val resultsInRaceDto = this.results
-        if (resultsInRaceDto.isNullOrEmpty()) return emptyList()
-
-        val season = this.season.toInt()
-        val round = this.round.toInt()
-        val url = this.url
-        val raceName = this.raceName
-        val circuitId = this.circuit.circuitId
-        val circuitName = this.circuit.circuitName
-        val raceDateTime = DateTime(this.date, this.time).toRaceDateTimeOrGivenTime(now).toString()
-        return resultsInRaceDto.map { it.toRaceResultDto(season, round, url, raceName, circuitId, circuitName, raceDateTime) }
-    }
-
-    private fun ResultDto.toRaceResultDto(
+    fun getRankings(
         season: Int,
         round: Int,
-        url: String,
-        raceName: String,
-        circuitId: String,
-        circuitName: String,
-        raceDateTime: String,
-    ): RaceResultDto =
-        RaceResultDto(
-            season,
-            round,
-            url,
-            raceName,
-            circuitId,
-            circuitName,
-            raceDateTime,
-            this.position.toInt(),
-            this.driver.driverId,
-            this.constructor.constructorId,
-            this.status,
-            this.time?.millis?.toLong(),
-            this.time?.time,
-            this.fastestLap?.rank?.toInt(),
-            this.fastestLap?.lap,
-            this.fastestLap?.time?.time,
-            this.fastestLap?.averageSpeed?.units,
-            this.fastestLap?.averageSpeed?.speed,
-        )
+    ): RankingDto =
+        try {
+            val raceResults = raceResultRepository.findAllBySeasonAndRound(season, round).sortedBy { it.position }
+            require(raceResults.isNotEmpty()) { "RaceResults does not exist" }
+            val drivers = driverRepository.findAllBySeason(season)
+            require(drivers.isNotEmpty()) { "Drivers does not exist" }
+            val constructors = constructorRepository.findAllBySeason(season)
+            require(constructors.isNotEmpty()) { "Constructors does not exist" }
 
-    fun findAllBySeasonAndRound(
-        season: Int,
-        round: Int,
-    ): List<RaceResultDto> = raceResultRepository.findAllBySeasonAndRound(season, round)
+            val driverIdToDriver = drivers.associateBy { it.driverId }
+            val constructorIdToConstructor = constructors.associateBy { it.constructorId }
+
+            val firstRaceResult = raceResults.first()
+            val url = firstRaceResult.url
+            val raceName = firstRaceResult.raceName
+            val circuitId = firstRaceResult.circuitId
+
+            val circuit = circuitRepository.findBySeasonAndCircuitIdOrNull(season, circuitId) ?: error("Circuit does not exist: $circuitId")
+
+            val raceDateTime = firstRaceResult.raceDatetime
+            val rankedDrivers =
+                raceResults.map {
+                    val driver = driverIdToDriver[it.driverId] ?: error("Driver does not exist: ${it.driverId}")
+                    val constructor =
+                        constructorIdToConstructor[it.constructorId] ?: error("Constructor does not exist: ${it.constructorId}")
+                    RankedDriverDto(
+                        driver = driver,
+                        position = it.position,
+                        constructor = constructor,
+                        status = it.status,
+                        timeText = it.timeText,
+                    )
+                }
+
+            RankingDto(
+                season = season,
+                round = round,
+                url = url,
+                raceName = raceName,
+                circuit = circuit,
+                raceDatetime = raceDateTime,
+                drivers = rankedDrivers,
+            ).also { LOGGER.info("{} getRanking: {}, {}, {}", LogResult.SUCCEEDED, season, round, it) }
+        } catch (e: Exception) {
+            LOGGER.error("{} getRanking: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
+            throw e
+        }
 }
