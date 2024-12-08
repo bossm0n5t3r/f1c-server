@@ -7,6 +7,8 @@ import kotlinx.datetime.toLocalDateTime
 import me.f1c.adapter.external.JolpicaF1ClientImpl
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
+import me.f1c.domain.constructor.ConstructorDto
+import me.f1c.domain.driver.DriverDto
 import me.f1c.domain.jolpica.JolpicaF1ResponseDto
 import me.f1c.domain.jolpica.MRDataWithRaceTable
 import me.f1c.domain.jolpica.SeasonAndRound
@@ -80,17 +82,35 @@ class RaceResultService(
         return raceResultRepository.batchInsert(raceResultDtoList)
     }
 
+    data class RaceResultContextData(
+        val raceResults: List<RaceResultDto>,
+        val drivers: List<DriverDto>,
+        val constructors: List<ConstructorDto>,
+    ) {
+        init {
+            require(raceResults.isNotEmpty()) { "RaceResults does not exist" }
+            require(drivers.isNotEmpty()) { "Drivers does not exist" }
+            require(constructors.isNotEmpty()) { "Constructors does not exist" }
+        }
+    }
+
+    private fun getRaceResultContextData(
+        season: Int,
+        round: Int,
+    ): RaceResultContextData {
+        val raceResults = raceResultRepository.findAllBySeasonAndRound(season, round)
+        val drivers = driverRepository.findAllBySeason(season)
+        val constructors = constructorRepository.findAllBySeason(season)
+        return RaceResultContextData(raceResults, drivers, constructors)
+    }
+
     fun getRankings(
         season: Int,
         round: Int,
     ): RankingDto =
         try {
-            val raceResults = raceResultRepository.findAllBySeasonAndRound(season, round).sortedBy { it.position }
-            require(raceResults.isNotEmpty()) { "RaceResults does not exist" }
-            val drivers = driverRepository.findAllBySeason(season)
-            require(drivers.isNotEmpty()) { "Drivers does not exist" }
-            val constructors = constructorRepository.findAllBySeason(season)
-            require(constructors.isNotEmpty()) { "Constructors does not exist" }
+            val (raceResults, drivers, constructors) = getRaceResultContextData(season, round)
+            val raceResultsSortedByPosition = raceResults.sortedBy { it.position }
 
             val driverIdToDriver = drivers.associateBy { it.driverId }
             val constructorIdToConstructor = constructors.associateBy { it.constructorId }
@@ -104,7 +124,7 @@ class RaceResultService(
 
             val raceDateTime = firstRaceResult.raceDatetime
             val rankedDrivers =
-                raceResults.map {
+                raceResultsSortedByPosition.map {
                     val driver = driverIdToDriver[it.driverId] ?: error("Driver does not exist: ${it.driverId}")
                     val constructor =
                         constructorIdToConstructor[it.constructorId] ?: error("Constructor does not exist: ${it.constructorId}")
@@ -125,9 +145,38 @@ class RaceResultService(
                 circuit = circuit,
                 raceDatetime = raceDateTime,
                 drivers = rankedDrivers,
-            ).also { LOGGER.info("{} getRanking: {}, {}, {}", LogResult.SUCCEEDED, season, round, it) }
+            ).also { LOGGER.info("{} getRankings: {}, {}, {}", LogResult.SUCCEEDED, season, round, it) }
         } catch (e: Exception) {
-            LOGGER.error("{} getRanking: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
+            LOGGER.error("{} getRankings: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
+            throw e
+        }
+
+    fun fastestLapNResults(
+        season: Int,
+        round: Int,
+        n: Int,
+    ): List<FastestLapResultDto> =
+        try {
+            require(n in 1..20) { "N should be between 1 and 20: $n" }
+
+            val (raceResults, drivers) = getRaceResultContextData(season, round)
+            val raceResultsSortedByFastestLapRank = raceResults.sortedBy { it.fastestLapRank }
+
+            val driverIdToDriver = drivers.associateBy { it.driverId }
+
+            raceResultsSortedByFastestLapRank
+                .take(n)
+                .map {
+                    val driver = driverIdToDriver[it.driverId] ?: error("Driver does not exist: ${it.driverId}")
+
+                    FastestLapResultDto(
+                        driver = driver,
+                        lap = it.fastestLapLap?.toInt(),
+                        time = it.fastestLapTime,
+                    )
+                }.also { LOGGER.info("{} getFastestLapNResults: {}, {}, {}, {}", LogResult.SUCCEEDED, season, round, n, it.size) }
+        } catch (e: Exception) {
+            LOGGER.error("{} getFastestLapNResults: {}, {}, {}, {}, ", LogResult.FAILED, season, round, n, e.message, e)
             throw e
         }
 }
