@@ -145,7 +145,7 @@ class RaceResultService(
                 circuit = circuit,
                 raceDatetime = raceDateTime,
                 drivers = rankedDrivers,
-            ).also { LOGGER.info("{} getRankings: {}, {}, {}", LogResult.SUCCEEDED, season, round, it) }
+            ).also { LOGGER.info("{} getRankings: {}, {}", LogResult.SUCCEEDED, season, round) }
         } catch (e: Exception) {
             LOGGER.error("{} getRankings: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
             throw e
