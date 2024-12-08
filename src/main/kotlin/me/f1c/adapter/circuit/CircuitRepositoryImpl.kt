@@ -6,6 +6,7 @@ import me.f1c.domain.circuit.Circuits
 import me.f1c.domain.circuit.toDto
 import me.f1c.port.circuit.CircuitRepository
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -36,5 +37,19 @@ class CircuitRepositoryImpl(
                 .where { Circuits.season eq season }
                 .run { CircuitEntity.wrapRows(this) }
                 .map { it.toDto() }
+        }
+
+    override fun findBySeasonAndCircuitIdOrNull(
+        season: Int,
+        circuitId: String,
+    ): CircuitDto? =
+        transaction(database) {
+            Circuits
+                .selectAll()
+                .where { Circuits.season eq season }
+                .andWhere { Circuits.circuitId eq circuitId }
+                .firstOrNull()
+                ?.run { CircuitEntity.wrapRow(this) }
+                ?.toDto()
         }
 }
