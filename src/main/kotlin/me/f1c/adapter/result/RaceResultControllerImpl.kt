@@ -1,6 +1,7 @@
 package me.f1c.adapter.result
 
 import me.f1c.domain.ResponseDto
+import me.f1c.domain.result.FastestLapResultDto
 import me.f1c.domain.result.RaceResultService
 import me.f1c.domain.result.RankingDto
 import me.f1c.domain.toResponseDto
@@ -20,4 +21,11 @@ class RaceResultControllerImpl(
         @PathVariable season: Int,
         @PathVariable round: Int,
     ): ResponseDto<RankingDto> = raceResultService.getRankings(season, round).toResponseDto()
+
+    @GetMapping("/{season}/{round}/fastest-lap/{n}/results")
+    override fun fastestLapNResults(
+        @PathVariable season: Int,
+        @PathVariable round: Int,
+        @PathVariable n: Int,
+    ): ResponseDto<List<FastestLapResultDto>> = raceResultService.fastestLapNResults(season, round, n).toResponseDto()
 }
