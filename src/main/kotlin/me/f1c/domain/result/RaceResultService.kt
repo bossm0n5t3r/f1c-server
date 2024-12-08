@@ -38,7 +38,7 @@ class RaceResultService(
             val latestSeasonAndRound = raceResultRepository.findLatest()?.toSeasonAndRound()
             if (latestFinishedSeasonAndRound != null &&
                 latestSeasonAndRound != null &&
-                latestFinishedSeasonAndRound >= latestSeasonAndRound
+                latestFinishedSeasonAndRound <= latestSeasonAndRound
             ) {
                 LOGGER.info(
                     "{} upToDate: {}, {}, {}",
@@ -51,8 +51,8 @@ class RaceResultService(
             }
             val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
             val season = now.year
-            val startSeasonAndRound = latestFinishedSeasonAndRound ?: SeasonAndRound(season, START_ROUND)
-            val endSeasonAndRound = latestSeasonAndRound ?: SeasonAndRound(season, END_ROUND)
+            val startSeasonAndRound = latestSeasonAndRound ?: SeasonAndRound(season, START_ROUND)
+            val endSeasonAndRound = latestFinishedSeasonAndRound ?: SeasonAndRound(season, END_ROUND)
             var totalCount = 0
             for (seasonAndRound in startSeasonAndRound..endSeasonAndRound) {
                 if (latestFinishedRaceSchedule != null && seasonAndRound == startSeasonAndRound) continue
