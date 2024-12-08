@@ -10,4 +10,6 @@ interface RaceScheduleController {
     ): ResponseDto<List<RaceScheduleDto>>
 
     fun findLatest(): ResponseDto<RaceScheduleDto?>
+
+    fun findLatestFinished(): ResponseDto<RaceScheduleDto?>
 }

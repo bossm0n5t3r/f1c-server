@@ -23,4 +23,7 @@ class RaceScheduleControllerImpl(
 
     @GetMapping("/latest")
     override fun findLatest(): ResponseDto<RaceScheduleDto?> = raceScheduleService.findLatest().toResponseDto()
+
+    @GetMapping("/latest/finished")
+    override fun findLatestFinished(): ResponseDto<RaceScheduleDto?> = raceScheduleService.findLatestFinished().toResponseDto()
 }

@@ -43,7 +43,7 @@ class RaceScheduleRepositoryImpl(
                 .firstOrNull()
                 ?.run { RaceScheduleEntity.wrapRow(this) }
                 ?.toDto()
-        } ?: findLatestFinished()
+        }
     }
 
     override fun findLatestFinished(): RaceScheduleDto? {
