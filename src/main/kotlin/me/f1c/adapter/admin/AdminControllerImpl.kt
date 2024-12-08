@@ -34,6 +34,9 @@ class AdminControllerImpl(
     @GetMapping("/up-to-date/constructor")
     override fun upToDateConstructor(): ResponseDto<Int> = adminService.upToDateConstructor().toResponseDto()
 
+    @GetMapping("/up-to-date/circuit")
+    override fun upToDateCircuit(): ResponseDto<Int> = adminService.upToDateCircuit().toResponseDto()
+
     @PostMapping("/summaries/sessions/{sessionKey}")
     override fun createSessionSummary(
         @PathVariable sessionKey: Int,

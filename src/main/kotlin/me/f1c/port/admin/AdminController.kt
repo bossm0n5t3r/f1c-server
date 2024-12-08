@@ -14,6 +14,8 @@ interface AdminController {
 
     fun upToDateConstructor(): ResponseDto<Int>
 
+    fun upToDateCircuit(): ResponseDto<Int>
+
     fun createSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
 
     fun updateSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
