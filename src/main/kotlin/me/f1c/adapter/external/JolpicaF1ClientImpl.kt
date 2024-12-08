@@ -27,6 +27,8 @@ class JolpicaF1ClientImpl(
 
     fun getConstructorApi(season: Int): String = "$JOLPICA_F1_API/$season/constructors/?format=json"
 
+    fun getCircuitApi(season: Int): String = "$JOLPICA_F1_API/$season/circuits/?format=json"
+
     fun getResultApi(
         season: Int,
         round: Int,
