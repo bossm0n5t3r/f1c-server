@@ -1,12 +1,10 @@
 package me.f1c.adapter.position
 
 import me.f1c.domain.ResponseDto
-import me.f1c.domain.driver.DriverDto
 import me.f1c.domain.position.PositionService
 import me.f1c.domain.toResponseDto
 import me.f1c.port.position.PositionController
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -23,9 +21,4 @@ class PositionControllerImpl(
     override fun upToDate(
         @PathVariable sessionKey: Int,
     ): ResponseDto<Int> = positionService.upToDate(sessionKey).toResponseDto()
-
-    @GetMapping("/{sessionKey}/rankings")
-    override fun rankings(
-        @PathVariable sessionKey: Int,
-    ): ResponseDto<List<DriverDto>> = positionService.rankings(sessionKey).toResponseDto()
 }
