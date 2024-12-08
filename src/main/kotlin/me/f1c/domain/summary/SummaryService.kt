@@ -55,11 +55,13 @@ class SummaryService(
             positions.groupBy { it.driverNumber }.mapValues { (_, positionsByDriver) ->
                 positionsByDriver.sortedBy { it.date }.map { it.position }
             }
-        val driverNumberToDriver = driverRepository.findAllBySessionKey(sessionKey).associateBy { it.driverNumber }
+        // FIXME: driver name
+//        val driverNumberToDriver = driverRepository.findAllBySessionKey(sessionKey).associateBy { it.driverNumber }
 
         val promptData = StringBuilder()
         for ((driverNumber, sortedPositions) in driverNumberToSortedPositions) {
-            promptData.append("driver_name: '${driverNumberToDriver[driverNumber]?.fullName}', ")
+            // FIXME: driver name
+//            promptData.append("driver_name: '${driverNumberToDriver[driverNumber]?.fullName}', ")
             promptData.append("positions: $sortedPositions, ")
             promptData.append("ranking: ${sortedPositions.last()}\n ")
         }
