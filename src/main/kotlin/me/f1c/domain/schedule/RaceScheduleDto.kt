@@ -11,6 +11,8 @@ data class RaceScheduleDto(
     val circuitName: String,
     val raceType: String,
     val raceDatetime: String,
+    val trackIconUrl: String? = null,
+    val mapUrl: String? = null,
 ) {
     fun toSeasonAndRound() = SeasonAndRound(season, round)
 }

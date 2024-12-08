@@ -1,7 +1,10 @@
 package me.f1c.domain.schedule
 
-fun RaceScheduleEntity.toDto() =
-    RaceScheduleDto(
+import me.f1c.domain.circuit.CircuitInfo
+
+fun RaceScheduleEntity.toDto(): RaceScheduleDto {
+    val circuitInfo = CircuitInfo.findByCircuitIdOrNull(circuitId)
+    return RaceScheduleDto(
         season,
         round,
         url,
@@ -10,4 +13,7 @@ fun RaceScheduleEntity.toDto() =
         circuitName,
         raceType,
         raceDatetime.toString(),
+        circuitInfo?.trackIconUrl,
+        circuitInfo?.mapUrl,
     )
+}
