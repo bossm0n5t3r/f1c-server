@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class RaceDto(
+data class Race(
     val season: String,
     val round: String,
     val url: String,
@@ -28,5 +28,7 @@ data class RaceDto(
     @JsonProperty("SprintShootout")
     val sprintShootout: DateTime? = null,
     @JsonProperty("Results")
-    val results: List<ResultDto>? = null,
+    val results: List<Result>? = null,
+    @JsonProperty("Laps")
+    val laps: List<Lap>? = null,
 )

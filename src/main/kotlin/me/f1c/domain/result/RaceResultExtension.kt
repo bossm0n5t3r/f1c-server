@@ -2,8 +2,8 @@ package me.f1c.domain.result
 
 import kotlinx.datetime.LocalDateTime
 import me.f1c.domain.jolpica.DateTime
-import me.f1c.domain.jolpica.RaceDto
-import me.f1c.domain.jolpica.ResultDto
+import me.f1c.domain.jolpica.Race
+import me.f1c.domain.jolpica.Result
 import me.f1c.domain.jolpica.toRaceDateTimeOrGivenTime
 
 fun RaceResultEntity.toDto() =
@@ -28,7 +28,7 @@ fun RaceResultEntity.toDto() =
         fastestLapAverageSpeedSpeed,
     )
 
-fun RaceDto.toRaceResultDtoList(now: LocalDateTime): List<RaceResultDto> {
+fun Race.toRaceResultDtoList(now: LocalDateTime): List<RaceResultDto> {
     val resultsInRaceDto = this.results
     if (resultsInRaceDto.isNullOrEmpty()) return emptyList()
 
@@ -42,7 +42,7 @@ fun RaceDto.toRaceResultDtoList(now: LocalDateTime): List<RaceResultDto> {
     return resultsInRaceDto.map { it.toRaceResultDto(season, round, url, raceName, circuitId, circuitName, raceDateTime) }
 }
 
-private fun ResultDto.toRaceResultDto(
+private fun Result.toRaceResultDto(
     season: Int,
     round: Int,
     url: String,

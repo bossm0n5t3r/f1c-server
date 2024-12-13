@@ -9,7 +9,7 @@ import me.f1c.configuration.LogResult
 import me.f1c.domain.jolpica.DateTime
 import me.f1c.domain.jolpica.JolpicaF1ResponseDto
 import me.f1c.domain.jolpica.MRDataWithRaceTable
-import me.f1c.domain.jolpica.RaceDto
+import me.f1c.domain.jolpica.Race
 import me.f1c.domain.jolpica.toRaceDateTimeOrGivenTime
 import me.f1c.exception.F1CBadRequestException
 import me.f1c.port.external.callGet
@@ -86,7 +86,7 @@ class RaceScheduleService(
             throw e
         }
 
-    private fun RaceDto.toRaceScheduleDtoList(now: LocalDateTime): List<RaceScheduleDto> =
+    private fun Race.toRaceScheduleDtoList(now: LocalDateTime): List<RaceScheduleDto> =
         listOfNotNull(
             this.firstPractice?.let { this.toRaceScheduleDto("FirstPractice", it, now) },
             this.secondPractice?.let { this.toRaceScheduleDto("SecondPractice", it, now) },
@@ -98,7 +98,7 @@ class RaceScheduleService(
             this.toRaceScheduleDto("Race", DateTime(this.date, this.time), now),
         )
 
-    private fun RaceDto.toRaceScheduleDto(
+    private fun Race.toRaceScheduleDto(
         raceType: String,
         raceDateTime: DateTime,
         now: LocalDateTime,
