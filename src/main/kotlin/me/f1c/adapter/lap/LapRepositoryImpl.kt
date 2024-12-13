@@ -1,12 +1,13 @@
 package me.f1c.adapter.lap
 
+import kotlinx.datetime.LocalDateTime
 import me.f1c.domain.lap.LapDto
 import me.f1c.domain.lap.LapEntity
 import me.f1c.domain.lap.Laps
 import me.f1c.domain.lap.toDto
 import me.f1c.port.lap.LapRepository
-import me.f1c.util.DateTimeUtil.toKotlinLocalDateTime
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -19,30 +20,25 @@ class LapRepositoryImpl(
     override fun batchInsert(lapDtoList: List<LapDto>): Int =
         transaction(database) {
             Laps.batchInsert(lapDtoList) {
-                this[Laps.meetingKey] = it.meetingKey
-                this[Laps.sessionKey] = it.sessionKey
-                this[Laps.driverNumber] = it.driverNumber
-                this[Laps.i1Speed] = it.i1Speed
-                this[Laps.i2Speed] = it.i2Speed
-                this[Laps.stSpeed] = it.stSpeed
-                this[Laps.dateStart] = it.dateStart?.toKotlinLocalDateTime()
-                this[Laps.lapDuration] = it.lapDuration
-                this[Laps.isPitOutLap] = it.isPitOutLap
-                this[Laps.durationSector1] = it.durationSector1
-                this[Laps.durationSector2] = it.durationSector2
-                this[Laps.durationSector3] = it.durationSector3
-                this[Laps.segmentsSector1List] = it.segmentsSector1.joinToString()
-                this[Laps.segmentsSector2List] = it.segmentsSector2.joinToString()
-                this[Laps.segmentsSector3List] = it.segmentsSector3.joinToString()
+                this[Laps.season] = it.season
+                this[Laps.round] = it.round
+                this[Laps.raceName] = it.raceName
+                this[Laps.circuitId] = it.circuitId
+                this[Laps.raceDatetime] = LocalDateTime.parse(it.raceDatetime)
                 this[Laps.lapNumber] = it.lapNumber
+                this[Laps.positions] = it.positions
             }
         }.size
 
-    override fun findAllBySessionKey(sessionKey: Int): List<LapDto> =
+    override fun findAllBySeasonAndRound(
+        season: Int,
+        round: Int,
+    ): List<LapDto> =
         transaction(database) {
             Laps
                 .selectAll()
-                .where { Laps.sessionKey eq sessionKey }
+                .where { Laps.season eq season }
+                .andWhere { Laps.round eq round }
                 .run { LapEntity.wrapRows(this) }
                 .map { it.toDto() }
         }

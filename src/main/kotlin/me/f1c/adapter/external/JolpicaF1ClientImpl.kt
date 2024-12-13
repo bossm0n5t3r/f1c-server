@@ -29,6 +29,12 @@ class JolpicaF1ClientImpl(
 
     fun getCircuitApi(season: Int): String = "$JOLPICA_F1_API/$season/circuits/?format=json"
 
+    fun getLapApi(
+        season: Int,
+        round: Int,
+        lapNumber: Int,
+    ) = "${JOLPICA_F1_API}/$season/$round/laps/$lapNumber/?format=json"
+
     fun getResultApi(
         season: Int,
         round: Int,

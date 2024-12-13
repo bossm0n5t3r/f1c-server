@@ -5,5 +5,8 @@ import me.f1c.domain.lap.LapDto
 interface LapRepository {
     fun batchInsert(lapDtoList: List<LapDto>): Int
 
-    fun findAllBySessionKey(sessionKey: Int): List<LapDto>
+    fun findAllBySeasonAndRound(
+        season: Int,
+        round: Int,
+    ): List<LapDto>
 }

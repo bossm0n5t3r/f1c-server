@@ -1,41 +1,43 @@
 package me.f1c.domain.lap
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import me.f1c.domain.jolpica.DateTime
+import me.f1c.domain.jolpica.LapTiming
+import me.f1c.domain.jolpica.Race
+import me.f1c.domain.jolpica.toRaceDateTimeOrGivenTime
+
 fun LapEntity.toDto() =
     LapDto(
-        meetingKey,
-        sessionKey,
-        driverNumber,
-        i1Speed,
-        i2Speed,
-        stSpeed,
-        dateStart.toString(),
-        lapDuration,
-        isPitOutLap,
-        durationSector1,
-        durationSector2,
-        durationSector3,
-        segmentsSector1List.takeIf { it.isNotBlank() }?.split(", ")?.map { it.takeIf { it != "null" }?.toInt() } ?: emptyList(),
-        segmentsSector2List.takeIf { it.isNotBlank() }?.split(", ")?.map { it.takeIf { it != "null" }?.toInt() } ?: emptyList(),
-        segmentsSector3List.takeIf { it.isNotBlank() }?.split(", ")?.map { it.takeIf { it != "null" }?.toInt() } ?: emptyList(),
+        season,
+        round,
+        raceName,
+        circuitId,
+        raceDatetime.toString(),
         lapNumber,
+        positions,
     )
 
-fun OpenF1LapDto.toDto() =
-    LapDto(
-        meetingKey,
-        sessionKey,
-        driverNumber,
-        i1Speed,
-        i2Speed,
-        stSpeed,
-        dateStart,
-        lapDuration,
-        isPitOutLap,
-        durationSector1,
-        durationSector2,
-        durationSector3,
-        segmentsSector1,
-        segmentsSector2,
-        segmentsSector3,
-        lapNumber,
+private fun LapTiming.toPositionDto() =
+    PositionDto(
+        this.driverId,
+        this.position,
+        this.time,
     )
+
+fun Race.toLapDto(): LapDto {
+    val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+    val lap = this.laps?.first()
+    requireNotNull(lap) { "Lap does not exist" }
+
+    return LapDto(
+        this.season.toInt(),
+        this.round.toInt(),
+        this.raceName,
+        this.circuit.circuitId,
+        DateTime(this.date, this.time).toRaceDateTimeOrGivenTime(now).toString(),
+        lap.number.toInt(),
+        lap.timings.map { it.toPositionDto() },
+    )
+}
