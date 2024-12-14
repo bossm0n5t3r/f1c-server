@@ -5,6 +5,7 @@ import me.f1c.configuration.LogResult
 import me.f1c.domain.circuit.CircuitService
 import me.f1c.domain.constructor.ConstructorService
 import me.f1c.domain.driver.DriverService
+import me.f1c.domain.lap.LapService
 import me.f1c.domain.position.PositionService
 import me.f1c.domain.result.RaceResultService
 import me.f1c.domain.schedule.RaceScheduleService
@@ -22,6 +23,7 @@ class AdminService(
     private val raceResultService: RaceResultService,
     private val constructorService: ConstructorService,
     private val circuitService: CircuitService,
+    private val lapService: LapService,
 ) {
     fun upToDate() =
         try {
@@ -62,4 +64,9 @@ class AdminService(
     fun upToDateConstructor(): Int = constructorService.upToDate()
 
     fun upToDateCircuit(): Int = circuitService.upToDate()
+
+    fun upToDateLaps(
+        season: Int,
+        round: Int,
+    ): Int = lapService.upToDate(season, round)
 }

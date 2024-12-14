@@ -16,6 +16,11 @@ interface AdminController {
 
     fun upToDateCircuit(): ResponseDto<Int>
 
+    fun upToDateLaps(
+        season: Int,
+        round: Int,
+    ): ResponseDto<Int>
+
     fun createSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
 
     fun updateSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
