@@ -59,6 +59,7 @@ class SummaryService(
         val positions =
             lapRepository
                 .findAllBySeasonAndRound(season, round)
+                .sortedBy { it.lapNumber }
                 .map {
                     "lap ${it.lapNumber}: ${it.positions.joinToString { (driverId, position, time) ->
                         "$position - ${DriverInfo.findByDriverIdOrNull(driverId)?.koreanDriverName} ($time)"
