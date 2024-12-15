@@ -1,9 +1,9 @@
 plugins {
     id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+    kotlin("jvm") version "2.1.0"
+    kotlin("plugin.spring") version "2.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 group = "me.f1c"
@@ -22,7 +22,7 @@ repositories {
 }
 
 extra["springAiVersion"] = "1.0.0-SNAPSHOT"
-private val exposedVersion = "0.56.0"
+private val exposedVersion = "0.57.0"
 private val mockkVersion = "1.13.13"
 
 dependencies {
@@ -72,7 +72,7 @@ tasks.withType<Test> {
 }
 
 ktlint {
-    version.set("1.4.1")
+    version.set("1.5.0")
 }
 
 tasks.bootJar {
