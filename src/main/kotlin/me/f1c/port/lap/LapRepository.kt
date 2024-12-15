@@ -9,4 +9,6 @@ interface LapRepository {
         season: Int,
         round: Int,
     ): List<LapDto>
+
+    fun findLatest(season: Int): LapDto?
 }

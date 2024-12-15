@@ -7,6 +7,7 @@ import me.f1c.domain.lap.Laps
 import me.f1c.domain.lap.toDto
 import me.f1c.port.lap.LapRepository
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
@@ -41,5 +42,17 @@ class LapRepositoryImpl(
                 .andWhere { Laps.round eq round }
                 .run { LapEntity.wrapRows(this) }
                 .map { it.toDto() }
+        }
+
+    override fun findLatest(season: Int): LapDto? =
+        transaction(database) {
+            Laps
+                .selectAll()
+                .where { Laps.season eq season }
+                .orderBy(Laps.round, SortOrder.ASC)
+                .limit(1)
+                .run { LapEntity.wrapRows(this) }
+                .map { it.toDto() }
+                .firstOrNull()
         }
 }
