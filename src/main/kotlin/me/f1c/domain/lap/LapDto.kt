@@ -1,5 +1,7 @@
 package me.f1c.domain.lap
 
+import me.f1c.domain.jolpica.SeasonAndRound
+
 data class LapDto(
     val season: Int,
     val round: Int,
@@ -8,4 +10,6 @@ data class LapDto(
     val raceDatetime: String,
     val lapNumber: Int,
     val positions: List<PositionDto>,
-)
+) {
+    fun toSeasonAndRound(): SeasonAndRound = SeasonAndRound(season, round)
+}
