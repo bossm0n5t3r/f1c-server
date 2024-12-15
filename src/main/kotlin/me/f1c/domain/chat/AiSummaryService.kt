@@ -51,13 +51,13 @@ class AiSummaryService(
 
             requireNotNull(
                 saved,
-            ).also { LOGGER.info("{} createSessionSummary: {}, {}, {}", LogResult.SUCCEEDED, season, round, it.revision) }
+            ).also { LOGGER.info("{} createRaceResultSummary: {}, {}, {}", LogResult.SUCCEEDED, season, round, it.revision) }
         } catch (e: Exception) {
-            LOGGER.error("{} createSessionSummary: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
+            LOGGER.error("{} createRaceResultSummary: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
             throw e
         }
 
-    fun updateSessionSummary(
+    fun updateRaceResultSummary(
         aiRaceResultSummaryDto: AiRaceResultSummaryDto,
         parameters: Map<String, String>,
     ): AiRaceResultSummaryDto =
@@ -89,7 +89,7 @@ class AiSummaryService(
 
             requireNotNull(saved).also {
                 LOGGER.info(
-                    "{} updateSessionSummary: {}, {}, {}, {}",
+                    "{} updateRaceResultSummary: {}, {}, {}, {}",
                     LogResult.SUCCEEDED,
                     aiRaceResultSummaryDto.season,
                     aiRaceResultSummaryDto.round,
@@ -99,7 +99,7 @@ class AiSummaryService(
             }
         } catch (e: Exception) {
             LOGGER.error(
-                "{} updateSessionSummary: {}, {}, {}, {}, ",
+                "{} updateRaceResultSummary: {}, {}, {}, {}, ",
                 LogResult.FAILED,
                 aiRaceResultSummaryDto.season,
                 aiRaceResultSummaryDto.round,
@@ -110,7 +110,7 @@ class AiSummaryService(
             throw e
         }
 
-    fun findLatestSessionSummaryBySeasonAndRoundAndChatModel(
+    fun findLatestRaceResultSummaryBySeasonAndRoundAndChatModel(
         season: Int,
         round: Int,
         chatModel: OpenAiApi.ChatModel,
