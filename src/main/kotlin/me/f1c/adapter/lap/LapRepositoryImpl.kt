@@ -49,7 +49,7 @@ class LapRepositoryImpl(
             Laps
                 .selectAll()
                 .where { Laps.season eq season }
-                .orderBy(Laps.round, SortOrder.ASC)
+                .orderBy(Laps.round, SortOrder.DESC)
                 .limit(1)
                 .run { LapEntity.wrapRows(this) }
                 .map { it.toDto() }
