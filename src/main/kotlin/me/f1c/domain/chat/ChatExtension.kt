@@ -2,10 +2,10 @@ package me.f1c.domain.chat
 
 import org.springframework.ai.openai.api.OpenAiApi
 
-fun AiSessionSummaryEntity.toDto() =
-    AiSessionSummaryDto(
-        id.value,
-        sessionKey,
+fun AiRaceResultSummaryEntity.toDto() =
+    AiRaceResultSummaryDto(
+        season,
+        round,
         prompt,
         summary,
         revision,

@@ -3,8 +3,8 @@ package me.f1c.domain.chat
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
 import me.f1c.port.chat.AiChat
-import me.f1c.port.chat.AiSessionSummaryRepository
-import me.f1c.port.chat.CreateAiSessionSummaryDto
+import me.f1c.port.chat.AiRaceResultSummaryRepository
+import me.f1c.port.chat.CreateAiRaceResultSummaryDto
 import me.f1c.port.chat.GeneratedSummaryDto
 import me.f1c.util.ObjectMapperUtil
 import org.springframework.ai.openai.api.OpenAiApi
@@ -15,98 +15,104 @@ import java.nio.charset.StandardCharsets
 
 @Service
 class AiSummaryService(
-    private val aiSessionSummaryRepository: AiSessionSummaryRepository,
-    @Value("classpath:/session-summary-prompt-template.st")
-    private val sessionSummaryPromptTemplate: Resource,
+    private val aiRaceResultSummaryRepository: AiRaceResultSummaryRepository,
+    @Value("classpath:/race-result-summary-prompt-template.st")
+    private val raceResultSummaryPromptTemplate: Resource,
     private val aiChat: AiChat,
     @Value("\${spring.ai.openai.chat.options.model}") private val chatModel: OpenAiApi.ChatModel,
 ) {
-    fun generateSessionSummary(
-        sessionKey: Int,
-        parameters: Map<String, String>,
-    ) = aiChat.generateSummaryWithClient(sessionSummaryPromptTemplate, parameters)
+    fun generateRaceResultSummary(parameters: Map<String, String>) =
+        aiChat.generateSummaryWithClient(raceResultSummaryPromptTemplate, parameters)
 
-    fun createSessionSummary(
-        sessionKey: Int,
+    fun createRaceResultSummary(
+        season: Int,
+        round: Int,
         parameters: Map<String, String>,
         generatedSummaryDto: GeneratedSummaryDto,
-    ): AiSessionSummaryDto =
+    ): AiRaceResultSummaryDto =
         try {
-            var summaryRequest = sessionSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
+            var summaryRequest = raceResultSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
             for ((key, value) in parameters) {
                 summaryRequest = summaryRequest.replace("{$key}", value)
             }
 
-            val createAiSessionSummaryDto =
-                CreateAiSessionSummaryDto(
-                    sessionKey,
+            val createAiRaceResultSummaryDto =
+                CreateAiRaceResultSummaryDto(
+                    season,
+                    round,
                     summaryRequest,
                     ObjectMapperUtil.objectMapper.writeValueAsString(generatedSummaryDto.data),
                     1,
                     chatModel,
                 )
 
-            val savedId = aiSessionSummaryRepository.save(createAiSessionSummaryDto)
-            val saved = aiSessionSummaryRepository.findById(savedId)
+            val savedId = aiRaceResultSummaryRepository.save(createAiRaceResultSummaryDto)
+            val saved = aiRaceResultSummaryRepository.findById(savedId)
 
             requireNotNull(
                 saved,
-            ).also { LOGGER.info("${LogResult.SUCCEEDED} createSessionSummary: {}, {}", sessionKey, it.revision) }
+            ).also { LOGGER.info("{} createSessionSummary: {}, {}, {}", LogResult.SUCCEEDED, season, round, it.revision) }
         } catch (e: Exception) {
-            LOGGER.error("${LogResult.FAILED} createSessionSummary: {}, {}, ", sessionKey, e.message, e)
+            LOGGER.error("{} createSessionSummary: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
             throw e
         }
 
     fun updateSessionSummary(
-        aiSessionSummaryDto: AiSessionSummaryDto,
+        aiRaceResultSummaryDto: AiRaceResultSummaryDto,
         parameters: Map<String, String>,
-    ): AiSessionSummaryDto =
+    ): AiRaceResultSummaryDto =
         try {
-            var summaryRequest = sessionSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
+            var summaryRequest = raceResultSummaryPromptTemplate.getContentAsString(StandardCharsets.UTF_8)
             for ((key, value) in parameters) {
                 summaryRequest = summaryRequest.replace("{$key}", value)
             }
             val prompt =
-                if (summaryRequest != aiSessionSummaryDto.prompt) {
+                if (summaryRequest != aiRaceResultSummaryDto.prompt) {
                     summaryRequest
                 } else {
-                    aiSessionSummaryDto.prompt
+                    aiRaceResultSummaryDto.prompt
                 }
             val answer = aiChat.generateSummaryWithClient(prompt)
 
-            val createAiSessionSummaryDto =
-                CreateAiSessionSummaryDto(
-                    aiSessionSummaryDto.sessionKey,
+            val createAiRaceResultSummaryDto =
+                CreateAiRaceResultSummaryDto(
+                    aiRaceResultSummaryDto.season,
+                    aiRaceResultSummaryDto.round,
                     prompt,
                     ObjectMapperUtil.objectMapper.writeValueAsString(answer.data),
-                    aiSessionSummaryDto.revision + 1,
+                    aiRaceResultSummaryDto.revision + 1,
                     chatModel,
                 )
 
-            val savedId = aiSessionSummaryRepository.save(createAiSessionSummaryDto)
-            val saved = aiSessionSummaryRepository.findById(savedId)
+            val savedId = aiRaceResultSummaryRepository.save(createAiRaceResultSummaryDto)
+            val saved = aiRaceResultSummaryRepository.findById(savedId)
 
             requireNotNull(saved).also {
                 LOGGER.info(
-                    "${LogResult.SUCCEEDED} updateSessionSummary: {}, {}, {}",
-                    aiSessionSummaryDto.sessionKey,
-                    aiSessionSummaryDto.revision,
+                    "{} updateSessionSummary: {}, {}, {}, {}",
+                    LogResult.SUCCEEDED,
+                    aiRaceResultSummaryDto.season,
+                    aiRaceResultSummaryDto.round,
+                    aiRaceResultSummaryDto.revision,
                     it.revision,
                 )
             }
         } catch (e: Exception) {
             LOGGER.error(
-                "${LogResult.FAILED} updateSessionSummary: {}, {}, {}, ",
-                aiSessionSummaryDto.sessionKey,
-                aiSessionSummaryDto.revision,
+                "{} updateSessionSummary: {}, {}, {}, {}, ",
+                LogResult.FAILED,
+                aiRaceResultSummaryDto.season,
+                aiRaceResultSummaryDto.round,
+                aiRaceResultSummaryDto.revision,
                 e.message,
                 e,
             )
             throw e
         }
 
-    fun findLatestSessionSummaryBySessionKeyAndChatModel(
-        sessionKey: Int,
+    fun findLatestSessionSummaryBySeasonAndRoundAndChatModel(
+        season: Int,
+        round: Int,
         chatModel: OpenAiApi.ChatModel,
-    ): AiSessionSummaryDto? = aiSessionSummaryRepository.findLatestBySessionKeyAndChatModel(sessionKey, chatModel)
+    ): AiRaceResultSummaryDto? = aiRaceResultSummaryRepository.findLatestBySeasonAndRoundAndChatModel(season, round, chatModel)
 }

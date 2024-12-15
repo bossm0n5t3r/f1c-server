@@ -2,8 +2,9 @@ package me.f1c.domain.chat
 
 import me.f1c.domain.BaseLongIdTable
 
-object AiSessionSummaries : BaseLongIdTable("ai_session_summaries") {
-    val sessionKey = integer("session_key")
+object AiRaceResultSummaries : BaseLongIdTable("ai_race_result_summaries") {
+    val season = integer("season")
+    val round = integer("round")
     val prompt = text("prompt")
     val summary = text("summary")
     val revision = integer("revision")

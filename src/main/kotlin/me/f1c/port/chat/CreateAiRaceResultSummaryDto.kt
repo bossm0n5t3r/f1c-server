@@ -1,10 +1,10 @@
-package me.f1c.domain.chat
+package me.f1c.port.chat
 
 import org.springframework.ai.openai.api.OpenAiApi
 
-data class AiSessionSummaryDto(
-    val id: Long,
-    val sessionKey: Int,
+data class CreateAiRaceResultSummaryDto(
+    val season: Int,
+    val round: Int,
     val prompt: String,
     val summary: String,
     val revision: Int,
