@@ -3,7 +3,6 @@ package me.f1c.job.tasklet
 import kotlinx.datetime.LocalDateTime
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
-import me.f1c.domain.admin.AdminService
 import me.f1c.domain.schedule.RaceScheduleService
 import me.f1c.domain.session.SessionService
 import org.springframework.batch.core.StepContribution
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component
 class UpToDateTasklet(
     private val raceScheduleService: RaceScheduleService,
     private val sessionService: SessionService,
-    private val adminService: AdminService,
 ) : Tasklet {
     override fun execute(
         contribution: StepContribution,
@@ -43,7 +41,7 @@ class UpToDateTasklet(
         }
 
         // Sessions 의 가장 최근 경기의 날짜가 없거나 현재시간 기준으로 가장 최근에 종료된 경기의 날짜가 없거나 둘이 같지 않으면 upToDate 실행
-        adminService.upToDate()
+//        adminService.upToDate()
         return RepeatStatus.FINISHED.also {
             LOGGER.info(
                 "{} execute: {}, {}, {}",
