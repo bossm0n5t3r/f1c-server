@@ -3,12 +3,12 @@ package me.f1c.domain.summary
 import com.fasterxml.jackson.module.kotlin.readValue
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
-import me.f1c.domain.chat.AiSessionSummaryDto
+import me.f1c.domain.chat.AiRaceResultSummaryDto
 import me.f1c.domain.chat.AiSummaryService
-import me.f1c.domain.session.SessionService
+import me.f1c.domain.driver.DriverInfo
 import me.f1c.exception.F1CInternalServerErrorException
-import me.f1c.port.driver.DriverRepository
-import me.f1c.port.position.PositionRepository
+import me.f1c.port.lap.LapRepository
+import me.f1c.port.result.RaceResultRepository
 import me.f1c.util.ObjectMapperUtil
 import org.springframework.ai.openai.api.OpenAiApi
 import org.springframework.beans.factory.annotation.Value
@@ -16,114 +16,102 @@ import org.springframework.stereotype.Service
 
 @Service
 class SummaryService(
-    private val positionRepository: PositionRepository,
-    private val driverRepository: DriverRepository,
+    private val lapRepository: LapRepository,
+    private val raceResultRepository: RaceResultRepository,
     private val aiSummaryService: AiSummaryService,
-    private val sessionService: SessionService,
     @Value("\${spring.ai.openai.chat.options.model}") private val chatModel: OpenAiApi.ChatModel,
 ) {
-    fun createSessionSummary(sessionKey: Int): AiSessionSummaryDto =
+    fun createRaceResultSummary(
+        season: Int,
+        round: Int,
+    ): AiRaceResultSummaryDto =
         try {
-            val previousSessionSummary = aiSummaryService.findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
-            require(previousSessionSummary == null) { "Session Summary Already Exists" }
+            val previousRaceResultSummary =
+                aiSummaryService.findLatestRaceResultSummaryBySeasonAndRoundAndChatModel(
+                    season,
+                    round,
+                    chatModel,
+                )
+            require(previousRaceResultSummary == null) { "Session Summary Already Exists" }
 
-            val sessionSummaryParameters = getSessionSummaryParameters(sessionKey)
+            val raceResultSummaryParameters = getRaceResultSummaryParameters(season, round)
 
-            val summary = aiSummaryService.generateSessionSummary(sessionKey, sessionSummaryParameters)
+            val summary = aiSummaryService.generateRaceResultSummary(raceResultSummaryParameters)
 
             val result =
-                aiSummaryService.createSessionSummary(
-                    sessionKey,
-                    sessionSummaryParameters,
+                aiSummaryService.createRaceResultSummary(
+                    season,
+                    round,
+                    raceResultSummaryParameters,
                     summary,
                 )
-            LOGGER.info("${LogResult.SUCCEEDED} createSessionSummary: {}", sessionKey)
+            LOGGER.info("{} createRaceResultSummary: {}, {}", LogResult.SUCCEEDED, season, round)
             result
         } catch (e: Exception) {
-            LOGGER.error("${LogResult.FAILED} createSessionSummary: {}, {}, ", sessionKey, e.message, e)
+            LOGGER.error("{} createRaceResultSummary: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
             throw F1CInternalServerErrorException(e)
         }
 
-    private fun getSessionSummaryParameters(sessionKey: Int): Map<String, String> {
+    private fun getRaceResultSummaryParameters(
+        season: Int,
+        round: Int,
+    ): Map<String, String> {
         val positions =
-            positionRepository
-                .findAllBySessionKey(sessionKey)
-                .takeIf { it.isNotEmpty() }
-                ?: error("Not found positions")
+            lapRepository
+                .findAllBySeasonAndRound(season, round)
+                .map {
+                    "lap ${it.lapNumber}: ${it.positions.joinToString { (driverId, position, time) ->
+                        "$position - ${DriverInfo.findByDriverIdOrNull(driverId)?.koreanDriverName} ($time)"
+                    }}"
+                }
 
-        val driverNumberToSortedPositions =
-            positions.groupBy { it.driverNumber }.mapValues { (_, positionsByDriver) ->
-                positionsByDriver.sortedBy { it.date }.map { it.position }
-            }
-        // FIXME: driver name
-//        val driverNumberToDriver = driverRepository.findAllBySessionKey(sessionKey).associateBy { it.driverNumber }
+        val ranking =
+            raceResultRepository
+                .findAllBySeasonAndRound(season, round)
+                .sortedBy { it.position }
+                .joinToString {
+                    "${it.position} - ${DriverInfo.findByDriverIdOrNull(it.driverId)?.koreanDriverName}"
+                }
 
-        val promptData = StringBuilder()
-        for ((driverNumber, sortedPositions) in driverNumberToSortedPositions) {
-            // FIXME: driver name
-//            promptData.append("driver_name: '${driverNumberToDriver[driverNumber]?.fullName}', ")
-            promptData.append("positions: $sortedPositions, ")
-            promptData.append("ranking: ${sortedPositions.last()}\n ")
-        }
-
-        return mapOf("data" to promptData.toString())
+        return mapOf(
+            "positions" to positions.joinToString("\n"),
+            "ranking" to ranking,
+        )
     }
 
-    fun getSessionSummary(sessionKey: Int): List<String> =
+    fun getRaceResultSummary(
+        season: Int,
+        round: Int,
+    ): List<String> =
         try {
             val result =
                 aiSummaryService
-                    .findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
+                    .findLatestRaceResultSummaryBySeasonAndRoundAndChatModel(season, round, chatModel)
                     ?.summary
                     ?.let { ObjectMapperUtil.objectMapper.readValue<List<String>>(it) }
                     ?: emptyList()
-            LOGGER.info("${LogResult.SUCCEEDED} getSessionSummary: {}", sessionKey)
+            LOGGER.info("{} getRaceResultSummary: {}, {}", LogResult.SUCCEEDED, season, round)
             result
         } catch (e: Exception) {
-            LOGGER.error("${LogResult.FAILED} getSessionSummary: {}, {}, ", sessionKey, e.message, e)
+            LOGGER.error("{} getRaceResultSummary: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
             emptyList()
         }
 
-    fun updateSessionSummary(sessionKey: Int): AiSessionSummaryDto =
+    fun updateRaceResultSummary(
+        season: Int,
+        round: Int,
+    ): AiRaceResultSummaryDto =
         try {
-            val previousSessionSummary =
-                aiSummaryService.findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
+            val previousRaceResultSummary =
+                aiSummaryService.findLatestRaceResultSummaryBySeasonAndRoundAndChatModel(season, round, chatModel)
                     ?: error("Not found latest session summary by session key")
 
-            val sessionSummaryParameters = getSessionSummaryParameters(sessionKey)
+            val raceResultSummaryParameters = getRaceResultSummaryParameters(season, round)
             aiSummaryService
-                .updateSessionSummary(previousSessionSummary, sessionSummaryParameters)
-                .also { LOGGER.info("${LogResult.SUCCEEDED} updateSessionSummary: {}, {}", sessionKey, it.revision) }
+                .updateRaceResultSummary(previousRaceResultSummary, raceResultSummaryParameters)
+                .also { LOGGER.info("{} updateRaceResultSummary: {}, {}, {}", LogResult.SUCCEEDED, season, round, it.revision) }
         } catch (e: Exception) {
-            LOGGER.error("${LogResult.FAILED} updateSessionSummary: {}, {}, ", sessionKey, e.message, e)
+            LOGGER.error("{} updateRaceResultSummary: {}, {}, {}, ", LogResult.FAILED, season, round, e.message, e)
             throw F1CInternalServerErrorException(e)
-        }
-
-    fun validateSessionSummaries() {
-        val allSessionKeys = sessionService.findAll().map { it.sessionKey }.distinct()
-
-        var validSessionKeyCount = 0
-        var invalidSessionKeyCount = 0
-        for (sessionKey in allSessionKeys) {
-            if (validateSessionSummary(sessionKey)) {
-                validSessionKeyCount++
-            } else {
-                invalidSessionKeyCount++
-            }
-        }
-        LOGGER.info("${LogResult.SUCCEEDED} validateSessionSummaries: {}, {}", validSessionKeyCount, invalidSessionKeyCount)
-    }
-
-    fun validateSessionSummary(sessionKey: Int): Boolean =
-        try {
-            val result =
-                aiSummaryService.findLatestSessionSummaryBySessionKeyAndChatModel(sessionKey, chatModel)
-                    ?: error("Not found latest session summary by session key")
-            val parsedSummary = ObjectMapperUtil.objectMapper.readValue<List<String>>(result.summary)
-            require(parsedSummary.isNotEmpty())
-            true
-        } catch (e: Exception) {
-            LOGGER.warn("${LogResult.FAILED} validateSessionSummary: {}, {}, ", sessionKey, e.message, e)
-            false
         }
 }
