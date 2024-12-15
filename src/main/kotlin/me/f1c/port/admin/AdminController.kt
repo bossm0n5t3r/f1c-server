@@ -1,11 +1,9 @@
 package me.f1c.port.admin
 
 import me.f1c.domain.ResponseDto
-import me.f1c.domain.chat.AiSessionSummaryDto
+import me.f1c.domain.chat.AiRaceResultSummaryDto
 
 interface AdminController {
-    fun upToDate(): ResponseDto<Unit>
-
     fun upToDateRaceSchedule(): ResponseDto<Int>
 
     fun upToDateRaceResult(): ResponseDto<Int>
@@ -16,16 +14,20 @@ interface AdminController {
 
     fun upToDateCircuit(): ResponseDto<Int>
 
+    fun upToDateAllLaps(): ResponseDto<Int>
+
     fun upToDateLaps(
         season: Int,
         round: Int,
     ): ResponseDto<Int>
 
-    fun createSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
+    fun createRaceResultSummary(
+        season: Int,
+        round: Int,
+    ): ResponseDto<AiRaceResultSummaryDto>
 
-    fun updateSessionSummary(sessionKey: Int): ResponseDto<AiSessionSummaryDto>
-
-    fun validateAllSessionSummaries(): ResponseDto<Unit>
-
-    fun validateSessionSummary(sessionKey: Int): ResponseDto<Boolean>
+    fun updateRaceResultSummary(
+        season: Int,
+        round: Int,
+    ): ResponseDto<AiRaceResultSummaryDto>
 }

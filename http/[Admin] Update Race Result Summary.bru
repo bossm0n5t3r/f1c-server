@@ -1,0 +1,16 @@
+meta {
+  name: [Admin] Update Race Result Summary
+  type: http
+  seq: 18
+}
+
+put {
+  url: {{API_URL}}/admin/summaries/race/result?season=2024&round=24
+  body: none
+  auth: none
+}
+
+params:query {
+  season: 2024
+  round: 24
+}
