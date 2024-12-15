@@ -7,69 +7,52 @@ import kotlinx.datetime.toLocalDateTime
 import me.f1c.adapter.external.JolpicaF1ClientImpl
 import me.f1c.configuration.LOGGER
 import me.f1c.configuration.LogResult
+import me.f1c.domain.UpToDateHelper
 import me.f1c.domain.constructor.ConstructorDto
 import me.f1c.domain.driver.DriverDto
 import me.f1c.domain.jolpica.JolpicaF1ResponseDto
 import me.f1c.domain.jolpica.MRDataWithRaceTable
 import me.f1c.domain.jolpica.SeasonAndRound
-import me.f1c.domain.schedule.RaceScheduleService
 import me.f1c.port.circuit.CircuitRepository
 import me.f1c.port.constructor.ConstructorRepository
 import me.f1c.port.driver.DriverRepository
 import me.f1c.port.external.callGet
 import me.f1c.port.result.RaceResultRepository
-import me.f1c.util.Constants.END_ROUND
 import me.f1c.util.Constants.START_ROUND
 import org.springframework.stereotype.Service
 
 @Service
 class RaceResultService(
     private val jolpicaF1Client: JolpicaF1ClientImpl,
-    private val raceScheduleService: RaceScheduleService,
     private val raceResultRepository: RaceResultRepository,
+    private val upToDateHelper: UpToDateHelper,
     private val driverRepository: DriverRepository,
     private val constructorRepository: ConstructorRepository,
     private val circuitRepository: CircuitRepository,
 ) {
-    fun upToDate(): Int {
-        return try {
-            val latestFinishedRaceSchedule = raceScheduleService.findLatestFinished()
-            val latestFinishedSeasonAndRound = latestFinishedRaceSchedule?.toSeasonAndRound()
-            val latestSeasonAndRound = raceResultRepository.findLatest()?.toSeasonAndRound()
-            if (latestFinishedSeasonAndRound != null &&
-                latestSeasonAndRound != null &&
-                latestFinishedSeasonAndRound <= latestSeasonAndRound
-            ) {
-                LOGGER.info(
-                    "{} upToDate: {}, {}, {}",
-                    LogResult.SUCCEEDED,
-                    "Already up-to-date",
-                    latestFinishedSeasonAndRound,
-                    latestSeasonAndRound,
-                )
-                return 0
-            }
+    fun upToDate(): Int =
+        try {
             val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
             val season = now.year
-            val startSeasonAndRound = latestSeasonAndRound ?: SeasonAndRound(season, START_ROUND)
-            val endSeasonAndRound = latestFinishedSeasonAndRound ?: SeasonAndRound(season, END_ROUND)
-            var totalCount = 0
-            for (seasonAndRound in startSeasonAndRound..endSeasonAndRound) {
-                if (latestFinishedRaceSchedule != null && seasonAndRound == startSeasonAndRound) continue
-                totalCount += callResultApiAndBatchInsert(seasonAndRound.season, seasonAndRound.round, now)
-            }
-            totalCount.also { LOGGER.info("{} upToDate: {}, {}, {}", LogResult.SUCCEEDED, startSeasonAndRound, endSeasonAndRound, it) }
+            val startSeasonAndRound = raceResultRepository.findLatest()?.toSeasonAndRound()?.inc() ?: SeasonAndRound(season, START_ROUND)
+            val (endSeasonAndRound, result) =
+                upToDateHelper.upToDate(now, startSeasonAndRound) { seasonAndRound, nowParameter ->
+                    callResultApiAndBatchInsert(seasonAndRound, nowParameter)
+                }
+            result.sum().also { LOGGER.info("{} upToDate: {}, {}, {}", LogResult.SUCCEEDED, startSeasonAndRound, endSeasonAndRound, it) }
         } catch (e: Exception) {
             LOGGER.error("{} upToDate: {}, ", LogResult.FAILED, e.message, e)
             throw e
         }
-    }
 
     private fun callResultApiAndBatchInsert(
-        season: Int,
-        round: Int,
+        seasonAndRound: SeasonAndRound,
         now: LocalDateTime,
     ): Int {
+        val (season, round) = seasonAndRound
+        if (raceResultRepository.findAllBySeasonAndRound(season, round).isNotEmpty()) {
+            return 0
+        }
         val resultApi = jolpicaF1Client.getResultApi(season, round)
         val resultResponseDto =
             requireNotNull(
