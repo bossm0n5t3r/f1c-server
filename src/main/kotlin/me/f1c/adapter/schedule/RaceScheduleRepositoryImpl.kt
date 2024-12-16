@@ -12,11 +12,12 @@ import kotlinx.datetime.toLocalDateTime
 import me.f1c.domain.schedule.RaceScheduleDto
 import me.f1c.domain.schedule.RaceScheduleEntity
 import me.f1c.domain.schedule.RaceSchedules
+import me.f1c.domain.schedule.RaceType
 import me.f1c.domain.schedule.toDto
 import me.f1c.port.schedule.RaceScheduleRepository
-import me.f1c.util.DateTimeUtil.SERVER_TIME_ZONE
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -34,25 +35,30 @@ class RaceScheduleRepositoryImpl(
                 .map { it.toDto() }
         }
 
-    override fun findLatest(): RaceScheduleDto? {
-        val now = Clock.System.now().toLocalDateTime(SERVER_TIME_ZONE)
+    override fun findLatest(raceType: RaceType): RaceScheduleDto? {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         return transaction(database) {
             RaceSchedules
                 .selectAll()
                 .where { RaceSchedules.raceDatetime greaterEq now }
+                .andWhere { RaceSchedules.raceType eq raceType.value }
+                .orderBy(RaceSchedules.raceDatetime, SortOrder.ASC)
+                .limit(1)
                 .firstOrNull()
                 ?.run { RaceScheduleEntity.wrapRow(this) }
                 ?.toDto()
         }
     }
 
-    override fun findLatestFinished(): RaceScheduleDto? {
+    override fun findLatestFinished(raceType: RaceType): RaceScheduleDto? {
         val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
         return transaction(database) {
             RaceSchedules
                 .selectAll()
                 .where { RaceSchedules.raceDatetime lessEq now }
+                .andWhere { RaceSchedules.raceType eq raceType.value }
                 .orderBy(RaceSchedules.raceDatetime, SortOrder.DESC)
+                .limit(1)
                 .firstOrNull()
                 ?.run { RaceScheduleEntity.wrapRow(this) }
                 ?.toDto()
