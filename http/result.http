@@ -1,0 +1,7 @@
+### Rankings
+
+GET {{API_URL}}/results/2024/24/rankings
+
+### Fastest Lap N Results
+
+GET {{API_URL}}/results/2024/24/fastest-lap/3/results

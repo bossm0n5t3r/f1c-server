@@ -1,0 +1,11 @@
+### Get Race Schedules By Year And Month
+
+GET {{API_URL}}/schedules?year=2024&month=11
+
+### Get Latest Race Schedule
+
+GET {{API_URL}}/schedules/latest
+
+### Get Latest Finished Race Schedule
+
+GET {{API_URL}}/schedules/latest/finished

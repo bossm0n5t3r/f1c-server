@@ -1,0 +1,3 @@
+### Summary - Race Result
+
+GET {{API_URL}}/summaries/race/result?season=2024&round=24

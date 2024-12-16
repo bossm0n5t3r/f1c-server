@@ -1,0 +1,3 @@
+### Find All Drivers
+
+GET {{API_URL}}/drivers/2024
