@@ -40,23 +40,27 @@ class RaceScheduleService(
             }
         }
 
-    fun findLatest(): RaceScheduleDto? =
+    fun findLatest(raceType: String? = null): RaceScheduleDto? =
         try {
+            require(raceType == null || RaceType.findByValueOrNull(raceType) != null) { "Invalid raceType: $raceType" }
+            val raceTypeOrDefaultValue = raceType?.let { RaceType.findByValueOrNull(raceType) } ?: RaceType.RACE
             raceScheduleRepository
-                .findLatest()
-                .also { LOGGER.info("{} findLatest", LogResult.SUCCEEDED) }
+                .findLatest(raceTypeOrDefaultValue)
+                .also { LOGGER.info("{} findLatest: {}", LogResult.SUCCEEDED, raceType) }
         } catch (e: Exception) {
-            LOGGER.error("{} findLatest: {}", LogResult.FAILED, e.message)
+            LOGGER.error("{} findLatest: {}, {}", LogResult.FAILED, raceType, e.message)
             throw e
         }
 
-    fun findLatestFinished(): RaceScheduleDto? =
+    fun findLatestFinished(raceType: String? = null): RaceScheduleDto? =
         try {
+            require(raceType == null || RaceType.findByValueOrNull(raceType) != null) { "Invalid raceType: $raceType" }
+            val raceTypeOrDefaultValue = raceType?.let { RaceType.findByValueOrNull(raceType) } ?: RaceType.RACE
             raceScheduleRepository
-                .findLatestFinished()
-                .also { LOGGER.info("{} findLatestFinished", LogResult.SUCCEEDED) }
+                .findLatestFinished(raceTypeOrDefaultValue)
+                .also { LOGGER.info("{} findLatestFinished: {}", LogResult.SUCCEEDED, raceType) }
         } catch (e: Exception) {
-            LOGGER.error("{} findLatestFinished: {}", LogResult.FAILED, e.message)
+            LOGGER.error("{} findLatestFinished: {}, {}", LogResult.FAILED, raceType, e.message)
             throw e
         }
 
