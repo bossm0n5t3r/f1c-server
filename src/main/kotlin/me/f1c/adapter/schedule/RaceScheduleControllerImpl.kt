@@ -22,8 +22,12 @@ class RaceScheduleControllerImpl(
     ): ResponseDto<List<RaceScheduleDto>> = raceScheduleService.findAllByYearAndMonth(year, month).toResponseDto()
 
     @GetMapping("/latest")
-    override fun findLatest(): ResponseDto<RaceScheduleDto?> = raceScheduleService.findLatest().toResponseDto()
+    override fun findLatest(
+        @RequestParam raceType: String?,
+    ): ResponseDto<RaceScheduleDto?> = raceScheduleService.findLatest(raceType).toResponseDto()
 
     @GetMapping("/latest/finished")
-    override fun findLatestFinished(): ResponseDto<RaceScheduleDto?> = raceScheduleService.findLatestFinished().toResponseDto()
+    override fun findLatestFinished(
+        @RequestParam raceType: String?,
+    ): ResponseDto<RaceScheduleDto?> = raceScheduleService.findLatestFinished(raceType).toResponseDto()
 }

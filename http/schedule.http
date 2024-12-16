@@ -6,6 +6,18 @@ GET {{API_URL}}/schedules?year=2024&month=11
 
 GET {{API_URL}}/schedules/latest
 
+### Get Latest Race Schedule By Race Type
+
+GET {{API_URL}}/schedules/latest?raceType=Qualifying
+
+### Get Latest Race Schedule By Wrong Race Type
+
+GET {{API_URL}}/schedules/latest?raceType=Invalid
+
 ### Get Latest Finished Race Schedule
 
 GET {{API_URL}}/schedules/latest/finished
+
+### Get Latest Finished Race Schedule By Race Type
+
+GET {{API_URL}}/schedules/latest/finished?raceType=FirstPractice

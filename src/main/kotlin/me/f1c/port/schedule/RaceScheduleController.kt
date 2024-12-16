@@ -9,7 +9,7 @@ interface RaceScheduleController {
         month: Int,
     ): ResponseDto<List<RaceScheduleDto>>
 
-    fun findLatest(): ResponseDto<RaceScheduleDto?>
+    fun findLatest(raceType: String?): ResponseDto<RaceScheduleDto?>
 
-    fun findLatestFinished(): ResponseDto<RaceScheduleDto?>
+    fun findLatestFinished(raceType: String?): ResponseDto<RaceScheduleDto?>
 }
