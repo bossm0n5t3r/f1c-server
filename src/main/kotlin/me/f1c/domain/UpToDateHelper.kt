@@ -22,7 +22,7 @@ class UpToDateHelper(
     ): Pair<SeasonAndRound, List<T>> {
         val latestFinishedRaceSchedule = raceScheduleService.findLatestFinished()
         val latestFinishedSeasonAndRound = latestFinishedRaceSchedule?.toSeasonAndRound()
-        if (latestFinishedSeasonAndRound != null && latestFinishedSeasonAndRound <= startSeasonAndRound) {
+        if (latestFinishedSeasonAndRound != null && latestFinishedSeasonAndRound < startSeasonAndRound) {
             LOGGER.info(
                 "{} upToDate: {}, {}, {}",
                 LogResult.SUCCEEDED,
