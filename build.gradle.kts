@@ -24,6 +24,8 @@ repositories {
 extra["springAiVersion"] = "1.0.0-SNAPSHOT"
 private val exposedVersion = "0.57.0"
 private val mockkVersion = "1.13.13"
+private val jjwtVersion = "0.12.6"
+private val bouncycastleVersion = "1.79"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -31,6 +33,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     implementation("org.springframework.batch:spring-batch-core")
+
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+    implementation("org.bouncycastle:bcprov-jdk18on:$bouncycastleVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
