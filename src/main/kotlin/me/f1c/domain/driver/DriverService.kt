@@ -27,19 +27,14 @@ class DriverService(
             throw e
         }
 
-    fun upToDate(): Int {
-        fun Int.withSucceededInfoLog() = this.also { LOGGER.info("{} upToDate: {}", LogResult.SUCCEEDED, it) }
-
-        return try {
+    fun upToDate(): Int =
+        try {
             val now =
                 Clock.System
                     .now()
                     .toLocalDateTime(SERVER_TIME_ZONE)
             val year = now.year
-            if (driverRepository.findAllBySeason(year).isNotEmpty()) {
-                return 0.withSucceededInfoLog()
-            }
-
+            val currentDriverIds = driverRepository.findAllBySeason(year).map { it.driverId }.toSet()
             val driverApi = jolpicaF1Client.getDriverApi(year)
             val driverResponseDto =
                 requireNotNull(
@@ -51,10 +46,11 @@ class DriverService(
                     .driverTable
                     .drivers
                     .map { it.toDriverDto(year) }
-            driverRepository.batchInsert(driverDtoList).withSucceededInfoLog()
+                    .filterNot { currentDriverIds.contains(it.driverId) }
+                    .sortedBy { it.driverId }
+            driverRepository.batchInsert(driverDtoList).also { LOGGER.info("{} upToDate: {}", LogResult.SUCCEEDED, it) }
         } catch (e: Exception) {
             LOGGER.error("{} upToDate: {}, ", LogResult.FAILED, e.message, e)
             throw e
         }
-    }
 }
