@@ -30,6 +30,11 @@ enum class DriverInfo(
         "프랑코 콜라핀토",
         "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FRACOL01_Franco_Colapinto/fracol01.png",
     ),
+    DOOHAN(
+        "doohan",
+        "잭 두한",
+        "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/J/JACDOO01_Jack_Doohan/jacdoo01.png",
+    ),
     GASLY(
         "gasly",
         "피에르 가슬리",
