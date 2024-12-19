@@ -17,4 +17,11 @@ class F1CExceptionHandlingAdvice {
     @ExceptionHandler(F1CException::class)
     @ResponseBody
     fun handleException(e: F1CException): ResponseEntity<ErrorResponse> = ResponseEntity(e.errorResponse, e.httpStatus)
+
+    @ExceptionHandler(Exception::class)
+    @ResponseBody
+    fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
+        val f1CInternalServerErrorException = F1CInternalServerErrorException(e)
+        return ResponseEntity(f1CInternalServerErrorException.errorResponse, f1CInternalServerErrorException.httpStatus)
+    }
 }
