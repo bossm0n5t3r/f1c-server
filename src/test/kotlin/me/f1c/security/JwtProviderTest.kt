@@ -1,48 +1,43 @@
 package me.f1c.security
 
+import me.f1c.security.JwtProvider.toECKey
+import me.f1c.util.CryptoUtil
 import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class JwtProviderTest {
     @Test
-    fun generateEncodedED25519KeyPairTest() {
-        assertDoesNotThrow {
-            JwtProvider.generateEncodedED25519KeyPair()
-        }
-    }
-
-    @Test
     fun createJWSTest() {
         assertDoesNotThrow {
-            val (_, encodedPrivateKey) = JwtProvider.generateEncodedED25519KeyPair()
-            val token = JwtProvider.createJWS(encodedPrivateKey)
+            val ecKey = CryptoUtil.generateECKeyPair().toECKey()
+            val token = JwtProvider.createJWS(ecKey)
             println(token)
         }
     }
 
     @Test
     fun verifyJWSTest() {
-        val (encodedPublicKey, encodedPrivateKey) = JwtProvider.generateEncodedED25519KeyPair()
-        val token = JwtProvider.createJWS(encodedPrivateKey)
+        val ecKey = CryptoUtil.generateECKeyPair().toECKey()
+        val token = JwtProvider.createJWS(ecKey)
 
-        assertTrue(JwtProvider.verifyJWS(token, encodedPublicKey))
+        assertTrue(JwtProvider.verifyJWS(token, ecKey))
     }
 
     @Test
     fun createJWETest() {
         assertDoesNotThrow {
-            val (encodedPublicKey, _) = JwtProvider.generateEncodedECKeyPair()
-            val token = JwtProvider.createJWE(encodedPublicKey)
+            val ecKey = CryptoUtil.generateECKeyPair().toECKey()
+            val token = JwtProvider.createJWE(ecKey)
             println(token)
         }
     }
 
     @Test
     fun verifyJWETest() {
-        val (encodedPublicKey, encodedPrivateKey) = JwtProvider.generateEncodedECKeyPair()
-        val token = JwtProvider.createJWE(encodedPublicKey)
+        val ecKey = CryptoUtil.generateECKeyPair().toECKey()
+        val token = JwtProvider.createJWE(ecKey)
 
-        assertTrue(JwtProvider.verifyJWE(token, encodedPrivateKey))
+        assertTrue(JwtProvider.verifyJWE(token, ecKey))
     }
 }
