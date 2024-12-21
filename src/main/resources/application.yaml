@@ -21,3 +21,7 @@ spring:
           model: gpt-4o-mini
           response-format:
             type: JSON_OBJECT
+f1c-client:
+  security:
+    client-id: ${CLIENT_ID:client-id}
+    client-secret: ${CLIENT_SECRET:{noop}client-secret}
