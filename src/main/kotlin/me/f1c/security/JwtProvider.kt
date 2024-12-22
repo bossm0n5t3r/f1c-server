@@ -13,48 +13,15 @@ import com.nimbusds.jose.crypto.ECDHDecrypter
 import com.nimbusds.jose.crypto.ECDHEncrypter
 import com.nimbusds.jose.crypto.ECDSASigner
 import com.nimbusds.jose.crypto.ECDSAVerifier
-import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jwt.EncryptedJWT
 import me.f1c.util.ObjectMapperUtil
 import org.springframework.security.oauth2.jwt.Jwt
-import java.security.KeyFactory
-import java.security.KeyPair
-import java.security.PrivateKey
-import java.security.PublicKey
-import java.security.interfaces.ECPublicKey
-import java.security.spec.PKCS8EncodedKeySpec
-import java.security.spec.X509EncodedKeySpec
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalEncodingApi::class, ExperimentalUuidApi::class)
 object JwtProvider {
     private const val ISSUER = "f1c"
     private val DEFAULT_CLAIMS = mapOf("iss" to ISSUER)
-
-    fun KeyPair.toECKey(): ECKey =
-        ECKey
-            .Builder(Curve.P_521, this.public as ECPublicKey)
-            .privateKey(this.private)
-            .keyID(Uuid.random().toString())
-            .build()
-
-    private fun String.toPublicKey(algorithm: String): PublicKey {
-        val keyBytes = Base64.decode(this)
-        val keySpec = X509EncodedKeySpec(keyBytes)
-        val keyFactory = KeyFactory.getInstance(algorithm)
-        return keyFactory.generatePublic(keySpec)
-    }
-
-    private fun String.toPrivateKey(algorithm: String): PrivateKey {
-        val keyBytes = Base64.decode(this)
-        val keySpec = PKCS8EncodedKeySpec(keyBytes)
-        val keyFactory = KeyFactory.getInstance(algorithm)
-        return keyFactory.generatePrivate(keySpec)
-    }
+    const val ROLE = "role"
 
     fun createJWS(
         ecKey: ECKey,
@@ -70,7 +37,7 @@ object JwtProvider {
                     .keyID(ecKey.keyID)
                     .apply { headers.forEach { (key, value) -> customParam(key, value) } }
                     .build(),
-                Payload(ObjectMapperUtil.objectMapper.writeValueAsString(claims)),
+                Payload(ObjectMapperUtil.objectMapper.writeValueAsString(DEFAULT_CLAIMS + claims)),
             )
 
         jwsObject.sign(signer)
@@ -107,7 +74,7 @@ object JwtProvider {
                             .filterKeys { JWEHeader.getRegisteredParameterNames().contains(it).not() }
                             .forEach { (key, value) -> customParam(key, value) }
                     }.build(),
-                Payload(ObjectMapperUtil.objectMapper.writeValueAsString(claims)),
+                Payload(ObjectMapperUtil.objectMapper.writeValueAsString(DEFAULT_CLAIMS + claims)),
             )
 
         jweObject.encrypt(encryptor)
@@ -123,6 +90,22 @@ object JwtProvider {
             val encryptedJWT = EncryptedJWT.parse(jwe)
             encryptedJWT.decrypt(ECDHDecrypter(ecKey))
             true
+        } catch (e: Exception) {
+            false
+        }
+
+    fun verifyRoleFromJWT(
+        token: String,
+        ecKey: ECKey,
+        role: UserRole,
+    ): Boolean =
+        try {
+            val jwsObject =
+                EncryptedJWT
+                    .parse(token)
+                    .apply { decrypt(ECDHDecrypter(ecKey)) }
+            val claims = jwsObject.payload.toJSONObject()
+            claims[ROLE] == role.role
         } catch (e: Exception) {
             false
         }
