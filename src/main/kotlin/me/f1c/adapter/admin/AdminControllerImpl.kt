@@ -1,10 +1,13 @@
 package me.f1c.adapter.admin
 
+import me.f1c.configuration.LOGGER
+import me.f1c.configuration.LogResult
 import me.f1c.domain.ResponseDto
 import me.f1c.domain.admin.AdminService
 import me.f1c.domain.chat.AiRaceResultSummaryDto
 import me.f1c.domain.toResponseDto
 import me.f1c.port.admin.AdminController
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -52,4 +55,10 @@ class AdminControllerImpl(
         @RequestParam season: Int,
         @RequestParam round: Int,
     ): ResponseDto<AiRaceResultSummaryDto> = adminService.updateRaceResultSummary(season, round).toResponseDto()
+
+    @GetMapping("/test")
+    fun test(): ResponseDto<String> {
+        LOGGER.info("{} test: {}", LogResult.SUCCEEDED, SecurityContextHolder.getContext().authentication)
+        return "test".toResponseDto()
+    }
 }
