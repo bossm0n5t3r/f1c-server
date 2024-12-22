@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
+import me.f1c.domain.token.TokenClientService
 import me.f1c.security.ClientCredentialsGenerator.BCRYPT_PASSWORD_ENCODER_STRENGTH
 import me.f1c.util.CryptoUtil.generateECKeyPair
 import me.f1c.util.CryptoUtil.toECKey
@@ -14,7 +15,6 @@ import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.AuthorizationGrantType
@@ -30,9 +30,8 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.intercept.AuthorizationFilter
 import java.time.Duration
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -40,9 +39,7 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class)
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration(
-    private val f1CSecurityProperties: F1CSecurityProperties,
-) {
+class SecurityConfiguration {
     @Bean
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     @Throws(Exception::class)
@@ -53,6 +50,7 @@ class SecurityConfiguration(
         registeredClientRepository: RegisteredClientRepository,
         jwtEncoder: JwtEncoder,
         jwtDecoder: JwtDecoder,
+        jwkSource: JWKSource<SecurityContext>,
     ): SecurityFilterChain {
         val authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer()
 
@@ -66,21 +64,13 @@ class SecurityConfiguration(
             }.authorizeHttpRequests { authorize ->
                 authorize
                     .requestMatchers("/admin/**")
-                    .authenticated()
+                    .hasRole(TokenRole.ADMIN.name)
                     .anyRequest()
                     .permitAll()
-            }.oauth2ResourceServer {
-                it.jwt { jwtConfigurer ->
-                    jwtConfigurer
-                        .jwtAuthenticationConverter { jwt ->
-                            BearerTokenAuthenticationToken(jwt.tokenValue)
-                        }.authenticationManager { authentication: Authentication ->
-                            JwtAuthenticationProvider(jwtDecoder).authenticate(authentication)
-                        }
-                }
             }.sessionManagement {
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }.exceptionHandling {
+            }.addFilterBefore(JwtAuthenticationFilter(jwkSource), AuthorizationFilter::class.java)
+            .exceptionHandling {
                 it
                     .authenticationEntryPoint { _, response, authException ->
                         authException.printStackTrace()
@@ -90,7 +80,7 @@ class SecurityConfiguration(
     }
 
     @Bean
-    fun registeredClientRepository(): RegisteredClientRepository {
+    fun registeredClientRepository(f1CSecurityProperties: F1CSecurityProperties): RegisteredClientRepository {
         val registeredClient =
             RegisteredClient
                 .withId(Uuid.random().toString())
@@ -100,6 +90,7 @@ class SecurityConfiguration(
                 .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofHours(1)).build())
                 .clientId(f1CSecurityProperties.clientId)
                 .clientSecret(f1CSecurityProperties.clientSecret)
+                .scope("ROLE_ADMIN")
                 .build()
         return InMemoryRegisteredClientRepository(registeredClient)
     }
@@ -121,7 +112,10 @@ class SecurityConfiguration(
     fun jwtDecoder(jwkSource: JWKSource<SecurityContext>): JwtDecoder = JwtDecoderImpl(jwkSource)
 
     @Bean
-    fun jwtEncoder(jwkSource: JWKSource<SecurityContext>): JwtEncoder = JwtEncoderImpl(jwkSource)
+    fun jwtEncoder(
+        jwkSource: JWKSource<SecurityContext>,
+        tokenClientService: TokenClientService,
+    ): JwtEncoder = JwtEncoderImpl(jwkSource, tokenClientService)
 
     @Bean
     fun authorizationServerSettings(): AuthorizationServerSettings = AuthorizationServerSettings.builder().build()
