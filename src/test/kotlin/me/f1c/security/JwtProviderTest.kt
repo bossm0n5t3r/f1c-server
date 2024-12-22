@@ -14,7 +14,7 @@ class JwtProviderTest {
     fun createJWSTest() {
         assertDoesNotThrow {
             val ecKey = CryptoUtil.generateECKeyPair().toECKey()
-            val token = JwtProvider.createJWS(ecKey, emptyMap(), mapOf(ROLE to UserRole.entries.random().role))
+            val token = JwtProvider.createJWS(ecKey, emptyMap(), mapOf(ROLE to TokenRole.entries.random().role))
             println(token)
         }
     }
@@ -22,8 +22,8 @@ class JwtProviderTest {
     @Test
     fun verifyJWSTest() {
         val ecKey = CryptoUtil.generateECKeyPair().toECKey()
-        val randomUserRole = UserRole.entries.random()
-        val token = JwtProvider.createJWS(ecKey, emptyMap(), mapOf(ROLE to randomUserRole.role))
+        val randomTokenRole = TokenRole.entries.random()
+        val token = JwtProvider.createJWS(ecKey, emptyMap(), mapOf(ROLE to randomTokenRole.role))
 
         assertTrue(JwtProvider.verifyJWS(token, ecKey))
     }
@@ -32,7 +32,7 @@ class JwtProviderTest {
     fun createJWETest() {
         assertDoesNotThrow {
             val ecKey = CryptoUtil.generateECKeyPair().toECKey()
-            val token = JwtProvider.createJWE(ecKey, emptyMap(), mapOf(ROLE to UserRole.entries.random().role))
+            val token = JwtProvider.createJWE(ecKey, emptyMap(), mapOf(ROLE to TokenRole.entries.random().role))
             println(token)
         }
     }
@@ -40,8 +40,8 @@ class JwtProviderTest {
     @Test
     fun verifyJWETest() {
         val ecKey = CryptoUtil.generateECKeyPair().toECKey()
-        val randomUserRole = UserRole.entries.random()
-        val token = JwtProvider.createJWE(ecKey, emptyMap(), mapOf(ROLE to randomUserRole.role))
+        val randomTokenRole = TokenRole.entries.random()
+        val token = JwtProvider.createJWE(ecKey, emptyMap(), mapOf(ROLE to randomTokenRole.role))
 
         assertTrue(JwtProvider.verifyJWE(token, ecKey))
     }
@@ -50,14 +50,14 @@ class JwtProviderTest {
     fun createAndVerifyJWTUsingGenerateEncodedECKeyPairTest() {
         val encodedECKeyPair = generateEncodedECKeyPair()
         val ecKey = encodedECKeyPair.toKeyPair().toECKey()
-        val randomUserRole = UserRole.entries.random()
+        val randomTokenRole = TokenRole.entries.random()
         val token =
             assertDoesNotThrow {
-                JwtProvider.createJWE(ecKey, emptyMap(), mapOf(ROLE to randomUserRole.role))
+                JwtProvider.createJWE(ecKey, emptyMap(), mapOf(ROLE to randomTokenRole.role))
             }
 
         assertTrue(JwtProvider.verifyJWE(token, ecKey))
 
-        assertTrue(JwtProvider.verifyRoleFromJWT(token, ecKey, randomUserRole))
+        assertTrue(JwtProvider.verifyRoleFromJWT(token, ecKey, randomTokenRole))
     }
 }

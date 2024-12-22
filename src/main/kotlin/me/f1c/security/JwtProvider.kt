@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.jwt.Jwt
 object JwtProvider {
     private const val ISSUER = "f1c"
     private val DEFAULT_CLAIMS = mapOf("iss" to ISSUER)
+    const val SUB = "sub"
     const val ROLE = "role"
 
     fun createJWS(
@@ -97,7 +98,7 @@ object JwtProvider {
     fun verifyRoleFromJWT(
         token: String,
         ecKey: ECKey,
-        role: UserRole,
+        role: TokenRole,
     ): Boolean =
         try {
             val jwsObject =
