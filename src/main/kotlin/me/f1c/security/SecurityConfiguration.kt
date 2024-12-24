@@ -6,11 +6,14 @@ import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import me.f1c.domain.token.TokenClientService
 import me.f1c.security.ClientCredentialsGenerator.BCRYPT_PASSWORD_ENCODER_STRENGTH
+import me.f1c.security.JwtProvider.ROLE
+import me.f1c.security.TokenRole.Companion.toTokenRole
 import me.f1c.util.CryptoUtil.generateECKeyPair
 import me.f1c.util.CryptoUtil.toECKey
 import org.springframework.boot.autoconfigure.security.SecurityProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -30,6 +33,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.intercept.AuthorizationFilter
 import java.time.Duration
@@ -41,43 +45,59 @@ import kotlin.uuid.Uuid
 @EnableWebSecurity
 class SecurityConfiguration {
     @Bean
-    @Order(SecurityProperties.BASIC_AUTH_ORDER)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     @Throws(Exception::class)
-    fun defaultSecurityFilterChain(
+    fun authorizationServerSecurityFilterChain(
         http: HttpSecurity,
         authorizationServerSettings: AuthorizationServerSettings,
         authorizationService: OAuth2AuthorizationService,
         registeredClientRepository: RegisteredClientRepository,
         jwtEncoder: JwtEncoder,
-        jwtDecoder: JwtDecoder,
-        jwkSource: JWKSource<SecurityContext>,
     ): SecurityFilterChain {
         val authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer()
 
         return http
-            .with(authorizationServerConfigurer) { authorizationServer ->
+            .securityMatcher(authorizationServerConfigurer.endpointsMatcher)
+            .with(authorizationServerConfigurer) { authorizationServer: OAuth2AuthorizationServerConfigurer ->
                 authorizationServer
                     .registeredClientRepository(registeredClientRepository)
                     .authorizationService(authorizationService)
                     .tokenGenerator(JwtGenerator(jwtEncoder))
                     .authorizationServerSettings(authorizationServerSettings)
-            }.authorizeHttpRequests { authorize ->
+            }.build()
+    }
+
+    @Bean
+    @Order(SecurityProperties.BASIC_AUTH_ORDER)
+    @Throws(Exception::class)
+    fun defaultSecurityFilterChain(
+        http: HttpSecurity,
+        jwtDecoder: JwtDecoder,
+        jwkSource: JWKSource<SecurityContext>,
+    ): SecurityFilterChain =
+        http
+            .httpBasic { it.disable() }
+            .csrf { it.disable() }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .addFilterBefore(JwtAuthenticationFilter(jwkSource), AuthorizationFilter::class.java)
+            .authorizeHttpRequests { authorize ->
                 authorize
                     .requestMatchers("/admin/**")
                     .hasRole(TokenRole.ADMIN.name)
+                    .requestMatchers("/batch/**")
+                    .hasRole(TokenRole.ADMIN.name)
                     .anyRequest()
                     .permitAll()
-            }.sessionManagement {
-                it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }.addFilterBefore(JwtAuthenticationFilter(jwkSource), AuthorizationFilter::class.java)
-            .exceptionHandling {
-                it
-                    .authenticationEntryPoint { _, response, authException ->
-                        authException.printStackTrace()
-                        response.sendError(401, authException.message)
-                    }
+            }.oauth2ResourceServer { oauth2 ->
+                oauth2.jwt {
+                    it
+                        .jwtAuthenticationConverter { jwt ->
+                            val role = jwt.claims[ROLE] as? String
+                            val authorities = listOf(role?.toTokenRole())
+                            JwtAuthenticationToken(jwt, authorities)
+                        }
+                }
             }.build()
-    }
 
     @Bean
     fun registeredClientRepository(f1CSecurityProperties: F1CSecurityProperties): RegisteredClientRepository {
