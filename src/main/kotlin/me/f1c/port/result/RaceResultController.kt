@@ -10,7 +10,7 @@ interface RaceResultController {
         round: Int,
     ): ResponseDto<RankingDto>
 
-    fun fastestLapNResults(
+    fun fastestNLaps(
         season: Int,
         round: Int,
         n: Int,

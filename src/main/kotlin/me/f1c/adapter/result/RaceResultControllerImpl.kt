@@ -22,10 +22,10 @@ class RaceResultControllerImpl(
         @PathVariable round: Int,
     ): ResponseDto<RankingDto> = raceResultService.getRankings(season, round).toResponseDto()
 
-    @GetMapping("/{season}/{round}/fastest-lap/{n}/results")
-    override fun fastestLapNResults(
+    @GetMapping("/{season}/{round}/fastest/{n}/laps")
+    override fun fastestNLaps(
         @PathVariable season: Int,
         @PathVariable round: Int,
         @PathVariable n: Int,
-    ): ResponseDto<List<FastestLapResultDto>> = raceResultService.fastestLapNResults(season, round, n).toResponseDto()
+    ): ResponseDto<List<FastestLapResultDto>> = raceResultService.fastestNLaps(season, round, n).toResponseDto()
 }

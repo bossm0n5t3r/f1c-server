@@ -75,6 +75,10 @@ class RaceResultService(
             require(drivers.isNotEmpty()) { "Drivers does not exist" }
             require(constructors.isNotEmpty()) { "Constructors does not exist" }
         }
+
+        val driverIdToDriver = drivers.associateBy { it.driverId }
+        val constructorIdToConstructor = constructors.associateBy { it.constructorId }
+        val firstRaceResult = raceResults.first()
     }
 
     private fun getRaceResultContextData(
@@ -92,13 +96,13 @@ class RaceResultService(
         round: Int,
     ): RankingDto =
         try {
-            val (raceResults, drivers, constructors) = getRaceResultContextData(season, round)
-            val raceResultsSortedByPosition = raceResults.sortedBy { it.position }
+            val raceResultContextData = getRaceResultContextData(season, round)
+            val driverIdToDriver = raceResultContextData.driverIdToDriver
+            val constructorIdToConstructor = raceResultContextData.constructorIdToConstructor
 
-            val driverIdToDriver = drivers.associateBy { it.driverId }
-            val constructorIdToConstructor = constructors.associateBy { it.constructorId }
+            val raceResultsSortedByPosition = raceResultContextData.raceResults.sortedBy { it.position }
 
-            val firstRaceResult = raceResults.first()
+            val firstRaceResult = raceResultContextData.firstRaceResult
             val url = firstRaceResult.url
             val raceName = firstRaceResult.raceName
             val circuitId = firstRaceResult.circuitId
@@ -134,26 +138,31 @@ class RaceResultService(
             throw e
         }
 
-    fun fastestLapNResults(
+    fun fastestNLaps(
         season: Int,
         round: Int,
         n: Int,
     ): List<FastestLapResultDto> =
         try {
-            require(n in 1..20) { "N should be between 1 and 20: $n" }
+            val raceResultContextData = getRaceResultContextData(season, round)
+            val driverIdToDriver = raceResultContextData.driverIdToDriver
+            val constructorIdToConstructor = raceResultContextData.constructorIdToConstructor
 
-            val (raceResults, drivers) = getRaceResultContextData(season, round)
-            val raceResultsSortedByFastestLapRank = raceResults.sortedBy { it.fastestLapRank }
-
-            val driverIdToDriver = drivers.associateBy { it.driverId }
+            val raceResultsSortedByFastestLapRank =
+                raceResultContextData.raceResults
+                    .filter { it.fastestLapRank != null }
+                    .sortedBy { it.fastestLapRank ?: Int.MAX_VALUE }
 
             raceResultsSortedByFastestLapRank
                 .take(n)
                 .map {
                     val driver = driverIdToDriver[it.driverId] ?: error("Driver does not exist: ${it.driverId}")
+                    val constructor =
+                        constructorIdToConstructor[it.constructorId] ?: error("Constructor does not exist: ${it.constructorId}")
 
                     FastestLapResultDto(
                         driver = driver,
+                        constructor = constructor,
                         lap = it.fastestLapLap?.toInt(),
                         time = it.fastestLapTime,
                     )
