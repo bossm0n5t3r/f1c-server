@@ -166,9 +166,9 @@ class RaceResultService(
                         lap = it.fastestLapLap?.toInt(),
                         time = it.fastestLapTime,
                     )
-                }.also { LOGGER.info("{} getFastestLapNResults: {}, {}, {}, {}", LogResult.SUCCEEDED, season, round, n, it.size) }
+                }.also { LOGGER.info("{} fastestNLaps: {}, {}, {}, {}", LogResult.SUCCEEDED, season, round, n, it.size) }
         } catch (e: Exception) {
-            LOGGER.error("{} getFastestLapNResults: {}, {}, {}, {}, ", LogResult.FAILED, season, round, n, e.message, e)
+            LOGGER.error("{} fastestNLaps: {}, {}, {}, {}, ", LogResult.FAILED, season, round, n, e.message, e)
             throw e
         }
 }
